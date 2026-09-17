@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -26,10 +28,15 @@ import com.github.mikephil.charting.formatter.PercentFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
 public class AnalysisFragment extends Fragment {
+
+    private List<FintechData> allData;
+    private List<String> monthList;
+    private int currentMonthIndex;
 
     @SuppressLint("DefaultLocale")
     @Override
@@ -44,26 +51,60 @@ public class AnalysisFragment extends Fragment {
         String filename = "LocalFintechDateBase.txt";
         boolean localFileExists = requireContext().getFileStreamPath(filename).exists();
         parser.readerFintechDataBase(requireContext(), localFileExists);
-        List<FintechData> allData = parser.fintechObjects;
+        allData = parser.fintechObjects;
 
         if (allData.isEmpty()) {
             return v;
         }
 
-        String currentMonth = allData.get(allData.size() - 1).getTransDate().substring(0, 7);
+        // 月のリストを作成（重複排除・ソート）
+        TreeMap<String, Integer> monthsMap = new TreeMap<>();
+        for (FintechData data : allData) {
+            monthsMap.put(data.getTransDate().substring(0, 7), 0);
+        }
+        monthList = new ArrayList<>(monthsMap.keySet());
+        currentMonthIndex = monthList.size() - 1; // 初期表示は最新月
 
-        setupPieChart(v, allData, currentMonth);
-        setupBarChart(v, allData);
+        // 月切り替えボタンの設定
+        ImageButton btnPrev = v.findViewById(R.id.btnPrevMonth);
+        ImageButton btnNext = v.findViewById(R.id.btnNextMonth);
+
+        btnPrev.setOnClickListener(view -> {
+            if (currentMonthIndex > 0) {
+                currentMonthIndex--;
+                updatePieChart(v);
+            }
+        });
+
+        btnNext.setOnClickListener(view -> {
+            if (currentMonthIndex < monthList.size() - 1) {
+                currentMonthIndex++;
+                updatePieChart(v);
+            }
+        });
+
+        updatePieChart(v);
+        setupBarChart(v);
 
         return v;
     }
 
-    // 今月の支出を用途分類ごとに集計して円グラフを表示する
-    private void setupPieChart(View v, List<FintechData> allData, String currentMonth) {
-        TextView tvPieTitle = v.findViewById(R.id.tvPieTitle);
-        tvPieTitle.setText("今月の支出内訳（" + currentMonth + "）");
+    // 指定された月の支出を用途分類ごとに集計して円グラフを表示する
+    private void updatePieChart(View v) {
+        String currentMonth = monthList.get(currentMonthIndex);
+        TextView tvHeaderTitle = v.findViewById(R.id.tvHeaderTitle);
+        tvHeaderTitle.setText("分析（" + currentMonth + "）");
 
-        // 用途分類ごとの支出合計を集計（登場順を保持）
+        // 前後ボタンの有効/無効切り替え
+        ImageButton btnPrev = v.findViewById(R.id.btnPrevMonth);
+        ImageButton btnNext = v.findViewById(R.id.btnNextMonth);
+        btnPrev.setEnabled(currentMonthIndex > 0);
+        btnNext.setEnabled(currentMonthIndex < monthList.size() - 1);
+        btnPrev.setAlpha(currentMonthIndex > 0 ? 1.0f : 0.3f);
+        btnNext.setAlpha(currentMonthIndex < monthList.size() - 1 ? 1.0f : 0.3f);
+
+        // 用途分類ごとの支出合計を集計
+        int totalExpense = 0;
         Map<String, Integer> expenseByUse = new LinkedHashMap<>();
         for (FintechData data : allData) {
             if (!data.getTransDate().substring(0, 7).equals(currentMonth)) {
@@ -75,47 +116,66 @@ public class AnalysisFragment extends Fragment {
             String use = data.getUse();
             int abs = -data.getAmount();
             expenseByUse.put(use, expenseByUse.getOrDefault(use, 0) + abs);
-        }
-
-        List<PieEntry> entries = new ArrayList<>();
-        List<Integer> colors = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry : expenseByUse.entrySet()) {
-            entries.add(new PieEntry(entry.getValue(), entry.getKey()));
-            colors.add(colorForCategory(entry.getKey()));
+            totalExpense += abs;
         }
 
         PieChart pieChart = v.findViewById(R.id.pieChart);
+        LinearLayout legendContainer = v.findViewById(R.id.llLegendContainer);
+        legendContainer.removeAllViews();
 
-        if (entries.isEmpty()) {
-            pieChart.setNoDataText("今月の支出データがありません");
+        if (expenseByUse.isEmpty()) {
+            pieChart.clear();
+            pieChart.setNoDataText("この月の支出データがありません");
             pieChart.invalidate();
             return;
         }
 
+        List<PieEntry> entries = new ArrayList<>();
+        List<Integer> colors = new ArrayList<>();
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+
+        for (Map.Entry<String, Integer> entry : expenseByUse.entrySet()) {
+            String category = entry.getKey();
+            int amount = entry.getValue();
+            float percent = (float) amount / totalExpense * 100f;
+            int color = colorForCategory(category);
+
+            entries.add(new PieEntry(amount, category));
+            colors.add(color);
+
+            // 右側の凡例セクションにアイテムを追加
+            View itemView = inflater.inflate(R.layout.item_analysis_category, legendContainer, false);
+            itemView.findViewById(R.id.viewCategoryColor).setBackgroundColor(color);
+            ((TextView) itemView.findViewById(R.id.tvCategoryName)).setText(category);
+            ((TextView) itemView.findViewById(R.id.tvCategoryAmount)).setText(String.format(Locale.JAPAN, "%,d円", amount));
+            ((TextView) itemView.findViewById(R.id.tvCategoryPercent)).setText(String.format(Locale.JAPAN, "(%.1f%%)", percent));
+            legendContainer.addView(itemView);
+        }
+
+        // 円グラフ中央に合計金額を表示
+        pieChart.setCenterText("合計支出\n" + String.format(Locale.JAPAN, "%,d", totalExpense) + "円");
+        pieChart.setCenterTextSize(14f);
+        pieChart.setDrawCenterText(true);
+
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColors(colors);
-        dataSet.setValueTextSize(13f);
-        dataSet.setValueTextColor(Color.WHITE);
+        dataSet.setDrawValues(false); // グラフ上の数値を非表示（右側に表示するため）
         dataSet.setSliceSpace(2f);
 
         PieData pieData = new PieData(dataSet);
-        pieData.setValueFormatter(new PercentFormatter(pieChart));
-
         pieChart.setData(pieData);
-        pieChart.setUsePercentValues(true);
+        pieChart.setUsePercentValues(false);
         pieChart.getDescription().setEnabled(false);
-        pieChart.setHoleRadius(45f);
-        pieChart.setTransparentCircleRadius(50f);
-        pieChart.setEntryLabelColor(Color.DKGRAY);
-        pieChart.setEntryLabelTextSize(12f);
-        pieChart.getLegend().setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
-        pieChart.getLegend().setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        pieChart.setHoleRadius(55f);
+        pieChart.setTransparentCircleRadius(60f);
+        pieChart.setDrawEntryLabels(false); // グラフ上のラベルを非表示
+        pieChart.getLegend().setEnabled(false); // 標準の凡例を非表示（自作したものを使うため）
         pieChart.animateY(600);
         pieChart.invalidate();
     }
 
     // 月ごとの収入・支出を棒グラフで表示する
-    private void setupBarChart(View v, List<FintechData> allData) {
+    private void setupBarChart(View v) {
         // 月ごとに収入・支出を集計（月順にソート）
         Map<String, int[]> monthly = new TreeMap<>(); // {月: [収入, 支出]}
         for (FintechData data : allData) {
