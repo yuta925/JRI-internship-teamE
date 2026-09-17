@@ -28,8 +28,16 @@ public class LoginDataSource {
             // ユーザーIDとパスワードが一致するユーザーを検索
             for (UserData user : csvReader.userObjects) {
                 if (user.getUserId().equals(userId) && user.getPassword().equals(password)) {
-                    // 認証成功
-                    LoggedInUser loggedInUser = new LoggedInUser(user.getUserId(), user.getDisplayName());
+                    // 認証成功：ログイン日時を記録し、連続ログイン日数を計算する
+                    csvReader.appendLoginHistory(context, user.getUserId(), user.getDisplayName());
+                    csvReader.readerLoginHistory(context);
+                    int consecutiveDays = csvReader.calcConsecutiveLoginDays(user.getUserId());
+                    String lastLoginDateTime = csvReader.loginHistoryObjects.isEmpty()
+                            ? null
+                            : csvReader.loginHistoryObjects.get(csvReader.loginHistoryObjects.size() - 1).getLoginDateTime();
+
+                    LoggedInUser loggedInUser = new LoggedInUser(
+                            user.getUserId(), user.getDisplayName(), consecutiveDays, lastLoginDateTime);
                     return new Result.Success<>(loggedInUser);
                 }
             }

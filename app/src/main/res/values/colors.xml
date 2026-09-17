@@ -16,6 +16,8 @@
     <color name="finIncome">#1E8E5A</color>
     <color name="finExpense">#D2691E</color>
     <color name="finSavings">#1565C0</color>
+    <color name="finBonusBackground">#FFF8E1</color>
+    <color name="finBonusText">#8A6D00</color>
 
     <!-- 分析グラフ用（用途分類ごとの色） -->
     <color name="finCatLiving">#2E7D32</color>
