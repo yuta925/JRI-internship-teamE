@@ -29,7 +29,7 @@ public class TransactionHistoryDetailActivity extends AppCompatActivity {
         }
 
         CsvReader parser = new CsvReader();
-        String filename = "LocalFintechDateBase.txt";
+        String filename = "LocalFintechDateBase_v3.txt";
         boolean localFileExists = getFileStreamPath(filename).exists();
         parser.readerFintechDataBase(this, localFileExists);
         allData = parser.fintechObjects;

@@ -28,7 +28,11 @@ import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -51,7 +55,7 @@ public class AnalysisFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_analysis, container, false);
 
         CsvReader parser = new CsvReader();
-        String filename = "LocalFintechDateBase.txt";
+        String filename = "LocalFintechDateBase_v3.txt";
         boolean localFileExists = requireContext().getFileStreamPath(filename).exists();
         parser.readerFintechDataBase(requireContext(), localFileExists);
         allData = parser.fintechObjects;
@@ -60,12 +64,39 @@ public class AnalysisFragment extends Fragment {
             return v;
         }
 
-        // 月のリストを作成（重複排除・ソート）
-        TreeMap<String, Integer> monthsMap = new TreeMap<>();
+        // 全データの月を取得し、最初と最後の月を特定
+        List<String> allMonths = new ArrayList<>();
         for (FintechData data : allData) {
-            monthsMap.put(data.getTransDate().substring(0, 7), 0);
+            allMonths.add(data.getTransDate().substring(0, 7));
         }
-        monthList = new ArrayList<>(monthsMap.keySet());
+        Collections.sort(allMonths);
+        String minMonth = allMonths.get(0);
+        String maxMonth = allMonths.get(allMonths.size() - 1);
+
+        // minMonthからmaxMonthまでの全ての月をリストに追加（データがない月も含める）
+        monthList = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM", Locale.JAPAN);
+        try {
+            java.util.Date startDate = sdf.parse(minMonth);
+            java.util.Date endDate = sdf.parse(maxMonth);
+            if (startDate != null && endDate != null) {
+                Calendar start = Calendar.getInstance();
+                start.setTime(startDate);
+                Calendar end = Calendar.getInstance();
+                end.setTime(endDate);
+
+                while (!start.after(end)) {
+                    monthList.add(sdf.format(start.getTime()));
+                    start.add(Calendar.MONTH, 1);
+                }
+            }
+        } catch (ParseException e) {
+            // 解析エラー時は従来通りデータのある月のみ
+            TreeMap<String, Integer> monthsMap = new TreeMap<>();
+            for (String m : allMonths) monthsMap.put(m, 0);
+            monthList = new ArrayList<>(monthsMap.keySet());
+        }
+
         currentMonthIndex = monthList.size() - 1; // 初期表示は最新月
 
         // 月切り替えボタンの設定
@@ -141,7 +172,14 @@ public class AnalysisFragment extends Fragment {
         if (expenseByUse.isEmpty()) {
             pieChart.clear();
             pieChart.setNoDataText("この月の支出データがありません");
+            pieChart.setNoDataTextColor(Color.GRAY);
             pieChart.invalidate();
+
+            TextView tvNoData = new TextView(requireContext());
+            tvNoData.setText("今月の支出データはありません");
+            tvNoData.setTextColor(Color.GRAY);
+            tvNoData.setPadding(0, 20, 0, 0);
+            legendContainer.addView(tvNoData);
             return;
         }
 
