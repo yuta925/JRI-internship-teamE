@@ -1,0 +1,43 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" tools:ignore="Typos">Fintech_sample1</string>
+    <string name="title_activity_login">ログイン</string>
+    <string name="prompt_userId">ユーザーID</string>
+    <string name="prompt_password">パスワード</string>
+    <string name="action_sign_in">ログイン</string>
+    <string name="action_sign_in_short">ログイン</string>
+    <string name="welcome">"ようこそ "</string>
+    <string name="invalid_userId">有効なユーザーIDを入力してください</string>
+    <string name="invalid_password">パスワードは6文字以上で入力してください</string>
+    <string name="login_failed">"ユーザーIDまたはパスワードが正しくありません"</string>
+    <string name="target_period">"対象期間"</string>
+    <string name="from">"2026/07/01"</string>
+    <string name="range">"～"</string>
+    <string name="to">"2026/08/31"</string>
+    <string name="display">"表示"</string>
+    <string name="withdrawal_details">"入出金履歴"</string>
+    <string name="date">"日付"</string>
+    <string name="contents">"内容"</string>
+    <string name="amount">"金額"</string>
+    <string name="budget">"収支合計"</string>
+    <string name="income">"収入"</string>
+    <string name="spending">"支出"</string>
+    <string name="max_spending">"最大支出"</string>
+    <string name="max_date">"日付"</string>
+    <string name="max_dealer">"取引先"</string>
+    <string name="max_contents">"内容"</string>
+    <string name="max_purpose">"用途"</string>
+    <string name="max_amount">"金額"</string>
+    <string name="list1" tools:ignore="Typos">"List1"</string>
+    <string name="list2">"List2"</string>
+    <string name="list3">"List3"</string>
+
+    <!-- タブタイトル -->
+    <string name="tab_home">"ホーム"</string>
+    <string name="tab_analysis">"分析"</string>
+    <string name="tab_history">"取引履歴"</string>
+
+    <!-- ホーム画面 -->
+    <string name="home_total_assets">"総資産"</string>
+    <string name="home_savings">"今月の貯金"</string>
+    <string name="home_month_over_month_prefix">"前月比 "</string>
+</resources>
