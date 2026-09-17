@@ -28,7 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
+//コメント
 public class AnalysisFragment extends Fragment {
 
     @SuppressLint("DefaultLocale")
