@@ -25,6 +25,9 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 
+import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.google.android.material.button.MaterialButtonToggleGroup;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -84,7 +87,19 @@ public class AnalysisFragment extends Fragment {
         });
 
         updatePieChart(v);
-        setupBarChart(v);
+        setupBarChart(v, 6); // 初期は直近6ヶ月
+
+        // レンジ切り替えボタンの設定
+        MaterialButtonToggleGroup toggleRange = v.findViewById(R.id.toggleRange);
+        toggleRange.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (isChecked) {
+                if (checkedId == R.id.btn6Months) {
+                    setupBarChart(v, 6);
+                } else if (checkedId == R.id.btn1Year) {
+                    setupBarChart(v, 12);
+                }
+            }
+        });
 
         return v;
     }
@@ -175,7 +190,7 @@ public class AnalysisFragment extends Fragment {
     }
 
     // 月ごとの収入・支出を棒グラフで表示する
-    private void setupBarChart(View v) {
+    private void setupBarChart(View v, int monthRange) {
         // 月ごとに収入・支出を集計（月順にソート）
         Map<String, int[]> monthly = new TreeMap<>(); // {月: [収入, 支出]}
         for (FintechData data : allData) {
@@ -188,19 +203,27 @@ public class AnalysisFragment extends Fragment {
             }
         }
 
-        List<String> months = new ArrayList<>(monthly.keySet());
+        List<String> allMonths = new ArrayList<>(monthly.keySet());
+        // 直近 monthRange 分の月を抽出
+        int start = Math.max(0, allMonths.size() - monthRange);
+        List<String> displayMonths = allMonths.subList(start, allMonths.size());
+
         List<BarEntry> incomeEntries = new ArrayList<>();
         List<BarEntry> expenseEntries = new ArrayList<>();
-        for (int i = 0; i < months.size(); i++) {
-            int[] sums = monthly.get(months.get(i));
-            incomeEntries.add(new BarEntry(i, sums[0]));
-            expenseEntries.add(new BarEntry(i, sums[1]));
+        for (int i = 0; i < displayMonths.size(); i++) {
+            String month = displayMonths.get(i);
+            int[] sums = monthly.get(month);
+            incomeEntries.add(new BarEntry(i, (float) sums[0] / 10000));
+            expenseEntries.add(new BarEntry(i, (float) sums[1] / 10000));
         }
 
         BarDataSet incomeSet = new BarDataSet(incomeEntries, "収入");
         incomeSet.setColor(ContextCompat.getColor(requireContext(), R.color.finIncome));
+        incomeSet.setDrawValues(false); // 棒の上の数値を非表示
+
         BarDataSet expenseSet = new BarDataSet(expenseEntries, "支出");
         expenseSet.setColor(ContextCompat.getColor(requireContext(), R.color.finExpense));
+        expenseSet.setDrawValues(false); // 棒の上の数値を非表示
 
         float groupSpace = 0.3f;
         float barSpace = 0.05f;
@@ -208,20 +231,37 @@ public class AnalysisFragment extends Fragment {
 
         BarData barData = new BarData(incomeSet, expenseSet);
         barData.setBarWidth(barWidth);
-        barData.setValueTextSize(10f);
 
         BarChart barChart = v.findViewById(R.id.barChart);
         barChart.setData(barData);
         barChart.getDescription().setEnabled(false);
         barChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
-        barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(months));
+        barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(displayMonths));
         barChart.getXAxis().setGranularity(1f);
         barChart.getXAxis().setCenterAxisLabels(true);
         barChart.getAxisRight().setEnabled(false);
         barChart.getAxisLeft().setAxisMinimum(0f);
+
+        // Y軸のフォーマッタ（万単位）
+        barChart.getAxisLeft().setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return String.format(Locale.JAPAN, "%.0f", value);
+            }
+        });
+
         barChart.getXAxis().setAxisMinimum(0);
-        barChart.getXAxis().setAxisMaximum(0 + barChart.getBarData().getGroupWidth(groupSpace, barSpace) * months.size());
+        barChart.getXAxis().setAxisMaximum(displayMonths.size());
         barChart.groupBars(0, groupSpace, barSpace);
+
+        // 凡例の設定（上部中央）
+        Legend legend = barChart.getLegend();
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+        legend.setDrawInside(false);
+        legend.setYOffset(10f);
+
         barChart.animateY(600);
         barChart.invalidate();
     }

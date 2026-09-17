@@ -121,19 +121,61 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/tvBarTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="月ごとの収支"
+                        android:textColor="@color/finTextPrimary"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_centerVertical="true" />
+
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/toggleRange"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        app:singleSelection="true"
+                        app:checkedButton="@+id/btn6Months">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn6Months"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:padding="0dp"
+                            android:text="6ヶ月"
+                            android:textSize="10sp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn1Year"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:padding="0dp"
+                            android:text="1年"
+                            android:textSize="10sp" />
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+                </RelativeLayout>
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="月ごとの収支"
-                    android:textColor="@color/finTextPrimary"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:text="(万)"
+                    android:textColor="@color/finTextMuted"
+                    android:textSize="10sp"
+                    android:layout_marginTop="4dp" />
 
                 <com.github.mikephil.charting.charts.BarChart
                     android:id="@+id/barChart"
                     android:layout_width="match_parent"
                     android:layout_height="260dp"
-                    android:layout_marginTop="8dp" />
+                    android:layout_marginTop="4dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
