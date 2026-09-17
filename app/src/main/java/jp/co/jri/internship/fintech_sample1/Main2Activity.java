@@ -17,6 +17,11 @@ public class Main2Activity extends AppCompatActivity {
         // レイアウト（activity_main2.xml）を表示する
         setContentView(R.layout.activity_main2);
 
+        // 各タブに独自のヘッダーがあるため、共通のActionBarは非表示にする
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+
         // アダプタ(TapPagerAdapter)を用いてタブ切り替え時のViewPager2の内容表示を制御する
         ViewPager2 pager = findViewById(R.id.pager);
         TapPagerAdapter adapter = new TapPagerAdapter(this);
