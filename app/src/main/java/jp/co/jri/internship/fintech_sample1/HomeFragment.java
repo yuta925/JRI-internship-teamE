@@ -1,16 +1,37 @@
 package jp.co.jri.internship.fintech_sample1;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.List;
 
 public class HomeFragment extends Fragment {
+
+    private static final String PREFS_NAME = "FintechPrefs";
+    private static final String KEY_TARGET_BUDGET = "target_budget";
+    private static final String KEY_TARGET_SAVINGS = "target_savings";
+
+    private TextView tvTargetBudget;
+    private TextView tvAchievementRate;
+    private ProgressBar pbAchievement;
+
+    private TextView tvTargetSavings;
+    private TextView tvSavingsAchievementRate;
+    private ProgressBar pbSavingsAchievement;
+
+    private int sumExpense = 0;
+    private int currentSavings = 0;
 
     @SuppressLint("DefaultLocale")
     @Override
@@ -34,12 +55,24 @@ public class HomeFragment extends Fragment {
         TextView tvExpense = v.findViewById(R.id.tvExpense);
         TextView tvSavings = v.findViewById(R.id.tvSavings);
 
+        // 新しく追加したUIコンポーネント
+        tvTargetBudget = v.findViewById(R.id.tvTargetBudget);
+        tvAchievementRate = v.findViewById(R.id.tvAchievementRate);
+        pbAchievement = v.findViewById(R.id.pbAchievement);
+        Button btnSetTarget = v.findViewById(R.id.btnSetTarget);
+
+        tvTargetSavings = v.findViewById(R.id.tvTargetSavings);
+        tvSavingsAchievementRate = v.findViewById(R.id.tvSavingsAchievementRate);
+        pbSavingsAchievement = v.findViewById(R.id.pbSavingsAchievement);
+        Button btnSetTargetSavings = v.findViewById(R.id.btnSetTargetSavings);
+
         if (allData.isEmpty()) {
             tvTotalAssets.setText("¥0");
             tvMoM.setText("");
             tvIncome.setText("¥0");
             tvExpense.setText("¥0");
             tvSavings.setText("¥0");
+            updateTargetDisplay();
             return v;
         }
 
@@ -50,7 +83,7 @@ public class HomeFragment extends Fragment {
         String previousMonth = previousMonth(currentMonth);
 
         int sumIncome = 0;
-        int sumExpense = 0;
+        sumExpense = 0;
         Integer previousMonthEndBalance = null;
 
         for (FintechData data : allData) {
@@ -68,12 +101,12 @@ public class HomeFragment extends Fragment {
             }
         }
 
-        int savings = sumIncome - sumExpense;
+        currentSavings = sumIncome - sumExpense;
 
         tvTotalAssets.setText(String.format("¥%,d", totalAssets));
         tvIncome.setText(String.format("¥%,d", sumIncome));
         tvExpense.setText(String.format("¥%,d", sumExpense));
-        tvSavings.setText(String.format("¥%,d", savings));
+        tvSavings.setText(String.format("¥%,d", currentSavings));
 
         if (previousMonthEndBalance != null && previousMonthEndBalance != 0) {
             int diff = totalAssets - previousMonthEndBalance;
@@ -87,7 +120,96 @@ public class HomeFragment extends Fragment {
             tvMoM.setText("");
         }
 
+        // 目標額の表示と達成率の更新
+        updateTargetDisplay();
+
+        // 目標設定ボタンの処理
+        btnSetTarget.setOnClickListener(view -> showTargetInputDialog());
+        btnSetTargetSavings.setOnClickListener(view -> showTargetSavingsInputDialog());
+
         return v;
+    }
+
+    // 目標額の表示と達成率の計算・更新
+    @SuppressLint("DefaultLocale")
+    private void updateTargetDisplay() {
+        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        
+        // 出費目標の更新
+        int targetBudget = prefs.getInt(KEY_TARGET_BUDGET, 0);
+        tvTargetBudget.setText(String.format("¥%,d", targetBudget));
+
+        if (targetBudget > 0) {
+            int rate = (int) ((sumExpense * 100.0) / targetBudget);
+            pbAchievement.setProgress(Math.min(rate, 100));
+            tvAchievementRate.setText(String.format("%d%%", rate));
+
+            if (rate > 100) {
+                tvAchievementRate.setTextColor(getResources().getColor(R.color.finNegative));
+            } else {
+                tvAchievementRate.setTextColor(getResources().getColor(R.color.finTextPrimary));
+            }
+        } else {
+            pbAchievement.setProgress(0);
+            tvAchievementRate.setText("0%");
+            tvAchievementRate.setTextColor(getResources().getColor(R.color.finTextPrimary));
+        }
+
+        // 貯金目標の更新
+        int targetSavings = prefs.getInt(KEY_TARGET_SAVINGS, 0);
+        tvTargetSavings.setText(String.format("¥%,d", targetSavings));
+
+        if (targetSavings > 0) {
+            int rate = (int) ((currentSavings * 100.0) / targetSavings);
+            pbSavingsAchievement.setProgress(Math.min(Math.max(rate, 0), 100));
+            tvSavingsAchievementRate.setText(String.format("%d%%", rate));
+
+            if (rate >= 100) {
+                tvSavingsAchievementRate.setTextColor(getResources().getColor(R.color.finPositive));
+            } else {
+                tvSavingsAchievementRate.setTextColor(getResources().getColor(R.color.finTextPrimary));
+            }
+        } else {
+            pbSavingsAchievement.setProgress(0);
+            tvSavingsAchievementRate.setText("0%");
+            tvSavingsAchievementRate.setTextColor(getResources().getColor(R.color.finTextPrimary));
+        }
+    }
+
+    // 目標金額入力ダイアログの表示（出費）
+    private void showTargetInputDialog() {
+        showInputDialog(R.string.target_amount_input_title, KEY_TARGET_BUDGET);
+    }
+
+    // 目標金額入力ダイアログの表示（貯金）
+    private void showTargetSavingsInputDialog() {
+        showInputDialog(R.string.target_savings_input_title, KEY_TARGET_SAVINGS);
+    }
+
+    // 汎用入力ダイアログ
+    private void showInputDialog(int titleResId, String prefKey) {
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_target_input, null);
+        EditText etTarget = dialogView.findViewById(R.id.etTarget);
+
+        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        int currentTarget = prefs.getInt(prefKey, 0);
+        if (currentTarget > 0) {
+            etTarget.setText(String.valueOf(currentTarget));
+        }
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle(titleResId)
+                .setView(dialogView)
+                .setPositiveButton(R.string.ok, (dialog, which) -> {
+                    String input = etTarget.getText().toString();
+                    if (!input.isEmpty()) {
+                        int newTarget = Integer.parseInt(input);
+                        prefs.edit().putInt(prefKey, newTarget).apply();
+                        updateTargetDisplay();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     // "YYYY/MM" の前月を計算する（年またぎを考慮）
