@@ -35,4 +35,9 @@
     <string name="home_login_bonus_title">"ログインボーナス"</string>
     <string name="home_login_bonus_message">"本日のログインで%dptを獲得しました！"</string>
     <string name="home_total_points">"総ポイント数"</string>
+
+    <!-- 目標達成率プッシュ通知 -->
+    <string name="goal_notification_channel_name">"目標達成率"</string>
+    <string name="goal_notification_title">"今月の目標達成率"</string>
+    <string name="goal_notification_text">"目標達成率：%d%%"</string>
 </resources>

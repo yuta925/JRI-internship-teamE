@@ -94,7 +94,6 @@ public class HomeFragment extends Fragment {
     }
 
     // 本日のログインボーナスを表示する（連続ログイン日数はMain2ActivityがLoginActivityから受け取ったIntentのExtraを流用）
-    // ※連続ログイン日数はLoginActivityのデバッグ用強制設定（ログインボタン長押し）の値も反映される
     private void setupLoginBonus(View v) {
         int consecutiveDays = requireActivity().getIntent()
                 .getIntExtra(Main2Activity.EXTRA_CONSECUTIVE_LOGIN_DAYS, 0);
