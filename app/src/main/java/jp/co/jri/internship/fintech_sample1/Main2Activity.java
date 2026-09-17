@@ -1,6 +1,7 @@
 package jp.co.jri.internship.fintech_sample1;
 
 import android.os.Bundle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.tabs.TabLayout;
@@ -9,6 +10,12 @@ import com.google.android.material.tabs.TabLayoutMediator;
 public class Main2Activity extends AppCompatActivity {
 
     private static final String[] TAB_TITLES = {"ホーム", "分析", "取引履歴"};
+
+    // LoginActivityから連続ログイン日数を受け取るためのIntentキー
+    public static final String EXTRA_CONSECUTIVE_LOGIN_DAYS = "extra_consecutive_login_days";
+
+    // ポップアップを表示する連続ログイン日数の間隔（5日ごと）
+    private static final int LOGIN_STREAK_MILESTONE = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,5 +41,19 @@ public class Main2Activity extends AppCompatActivity {
                 pager,
                 (tab, position) -> tab.setText(TAB_TITLES[position])
         ).attach();
+
+        showLoginStreakPopupIfNeeded();
+    }
+
+    // 連続ログイン日数が節目(5日ごと)に達していたらお祝いポップアップを表示する
+    private void showLoginStreakPopupIfNeeded() {
+        int consecutiveLoginDays = getIntent().getIntExtra(EXTRA_CONSECUTIVE_LOGIN_DAYS, 0);
+        if (consecutiveLoginDays > 0 && consecutiveLoginDays % LOGIN_STREAK_MILESTONE == 0) {
+            new AlertDialog.Builder(this)
+                    .setTitle("継続ログイン達成")
+                    .setMessage(consecutiveLoginDays + "日連続ログインを達成しました！")
+                    .setPositiveButton("OK", null)
+                    .show();
+        }
     }
 }
