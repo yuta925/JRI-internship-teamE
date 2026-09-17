@@ -6,6 +6,10 @@ import android.app.NotificationManager;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
@@ -37,6 +41,10 @@ public class Main2Activity extends AppCompatActivity {
 
     private final ActivityResultLauncher<String> notificationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> { });
+
+    // 特別な画像付きポップアップを表示する連続ログイン日数
+    private static final int LOGIN_STREAK_SPECIAL_100 = 100;
+    private static final int LOGIN_STREAK_SPECIAL_365 = 365;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,10 +86,22 @@ public class Main2Activity extends AppCompatActivity {
         }
     }
 
-    // 連続ログイン日数が節目(5日ごと)に達していたらお祝いポップアップを表示する
+    // 連続ログイン日数が節目に達していたらお祝いポップアップを表示する
     private void showLoginStreakPopupIfNeeded() {
         int consecutiveLoginDays = getIntent().getIntExtra(EXTRA_CONSECUTIVE_LOGIN_DAYS, 0);
-        if (consecutiveLoginDays > 0 && consecutiveLoginDays % LOGIN_STREAK_MILESTONE == 0) {
+        if (consecutiveLoginDays <= 0) {
+            return;
+        }
+
+        if (consecutiveLoginDays == LOGIN_STREAK_SPECIAL_365) {
+            // 365日達成：特別な画像でお祝い
+            showImagePopup(R.drawable.login_bonus_365days,
+                    "365日連続ログイン達成！\nおめでとうございます！");
+        } else if (consecutiveLoginDays == LOGIN_STREAK_SPECIAL_100) {
+            // 100日達成：特別な画像でお祝い
+            showImagePopup(R.drawable.login_bonus_100days,
+                    "100日連続ログイン達成！");
+        } else if (consecutiveLoginDays % LOGIN_STREAK_MILESTONE == 0) {
             new AlertDialog.Builder(this)
                     .setTitle("継続ログイン達成")
                     .setMessage(consecutiveLoginDays + "日連続ログインを達成しました！")
@@ -141,5 +161,38 @@ public class Main2Activity extends AppCompatActivity {
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(channel);
         }
+    }
+
+    // 画像とメッセージを表示するお祝いポップアップ
+    private void showImagePopup(int drawableRes, String message) {
+        int padding = (int) (24 * getResources().getDisplayMetrics().density);
+
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setGravity(Gravity.CENTER_HORIZONTAL);
+        container.setPadding(padding, padding, padding, padding);
+
+        int maxImageSize = (int) (220 * getResources().getDisplayMetrics().density);
+        ImageView imageView = new ImageView(this);
+        imageView.setImageResource(drawableRes);
+        imageView.setAdjustViewBounds(true);
+        imageView.setMaxWidth(maxImageSize);
+        imageView.setMaxHeight(maxImageSize);
+        LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        imageView.setLayoutParams(imageParams);
+        container.addView(imageView);
+
+        TextView textView = new TextView(this);
+        textView.setText(message);
+        textView.setGravity(Gravity.CENTER);
+        textView.setTextSize(16f);
+        textView.setPadding(0, padding, 0, 0);
+        container.addView(textView);
+
+        new AlertDialog.Builder(this)
+                .setView(container)
+                .setPositiveButton("OK", null)
+                .show();
     }
 }
