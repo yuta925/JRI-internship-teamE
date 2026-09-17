@@ -9,15 +9,7 @@
     <string name="invalid_userId">有効なユーザーIDを入力してください</string>
     <string name="invalid_password">パスワードは6文字以上で入力してください</string>
     <string name="login_failed">"ユーザーIDまたはパスワードが正しくありません"</string>
-    <string name="target_period">"対象期間"</string>
-    <string name="from">"2026/07/01"</string>
-    <string name="range">"～"</string>
-    <string name="to">"2026/08/31"</string>
-    <string name="display">"表示"</string>
     <string name="withdrawal_details">"入出金履歴"</string>
-    <string name="date">"日付"</string>
-    <string name="contents">"内容"</string>
-    <string name="amount">"金額"</string>
     <string name="budget">"収支合計"</string>
     <string name="income">"収入"</string>
     <string name="spending">"支出"</string>
