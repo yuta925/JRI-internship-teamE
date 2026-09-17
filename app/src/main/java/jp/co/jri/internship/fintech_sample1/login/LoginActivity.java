@@ -20,6 +20,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import jp.co.jri.internship.fintech_sample1.LoginBonusUtil;
 import jp.co.jri.internship.fintech_sample1.Main2Activity;
 import jp.co.jri.internship.fintech_sample1.R;
 
@@ -179,6 +180,12 @@ public class LoginActivity extends AppCompatActivity {
         int forcedStreak = getSharedPreferences(DEBUG_PREFS_NAME, MODE_PRIVATE).getInt(KEY_FORCED_STREAK, -1);
         int streakToUse = forcedStreak >= 0 ? forcedStreak : actualStreak;
         // ▲▲▲ デバッグ用ここまで ▲▲▲
+
+        // ログインボーナスのポイントを計算し、総ポイント数に加算する
+        if (streakToUse > 0) {
+            int earnedPoints = LoginBonusUtil.calcPoints(streakToUse);
+            LoginBonusUtil.addPoints(this, earnedPoints);
+        }
 
         Intent intent = new Intent(this, Main2Activity.class);  // インテントの作成
         intent.putExtra(Main2Activity.EXTRA_CONSECUTIVE_LOGIN_DAYS, streakToUse);
