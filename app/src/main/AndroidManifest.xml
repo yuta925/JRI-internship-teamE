@@ -10,6 +10,8 @@
         android:theme="@style/AppTheme">
         <activity android:name=".Main2Activity"
             android:exported="false" />
+        <activity android:name=".TransactionHistoryDetailActivity"
+            android:exported="false" />
         <activity android:name=".login.LoginActivity"
             android:exported="true">
             <intent-filter>

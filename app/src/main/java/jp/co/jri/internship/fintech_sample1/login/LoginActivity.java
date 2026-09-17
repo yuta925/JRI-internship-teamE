@@ -32,6 +32,11 @@ public class LoginActivity extends AppCompatActivity {
         // レイアウト（activity_login.xml）を表示する
         setContentView(R.layout.activity_login);
 
+        // ログイン画面は独自デザインのため、共通のActionBarは非表示にする
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+
         loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
         mContext = this;
@@ -40,6 +45,9 @@ public class LoginActivity extends AppCompatActivity {
         final EditText passwordEditText = findViewById(R.id.password);
         final Button loginButton = findViewById(R.id.login);
         final ProgressBar loadingProgressBar = findViewById(R.id.loading);
+
+        // 起動時にユーザーID欄へフォーカスし、キーボード入力をすぐ受け付けられるようにする
+        userIdEditText.requestFocus();
 
         // 入力条件チェック結果に応じて表示を変更
         loginViewModel.getLoginFormState().observe(this, loginFormState -> {
