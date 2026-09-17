@@ -22,6 +22,7 @@ public class HomeFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_home, container, false);
 
         setupLoginBonus(v);
+        setupTotalPoints(v);
 
         // CSVから取引データを読み込む
         CsvReader parser = new CsvReader();
@@ -104,25 +105,18 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-        int points = calcLoginBonusPoints(consecutiveDays);
+        int points = LoginBonusUtil.calcPoints(consecutiveDays);
         TextView tvLoginBonusMessage = v.findViewById(R.id.tvLoginBonusMessage);
         tvLoginBonusMessage.setText(getString(R.string.home_login_bonus_message, points));
         cvLoginBonus.setVisibility(View.VISIBLE);
     }
 
-    // 連続ログイン日数に応じたボーナスポイントをざっくり算出する
-    private int calcLoginBonusPoints(int consecutiveDays) {
-        if (consecutiveDays >= 30) {
-            return 100;
-        } else if (consecutiveDays >= 14) {
-            return 50;
-        } else if (consecutiveDays >= 7) {
-            return 30;
-        } else if (consecutiveDays >= 3) {
-            return 20;
-        } else {
-            return 10;
-        }
+    // 総ポイント数を表示する（この機能導入前の総ポイント数は0として扱う）
+    @SuppressLint("DefaultLocale")
+    private void setupTotalPoints(View v) {
+        int totalPoints = LoginBonusUtil.getTotalPoints(requireContext());
+        TextView tvTotalPoints = v.findViewById(R.id.tvTotalPoints);
+        tvTotalPoints.setText(String.format("%,dpt", totalPoints));
     }
 
     // "YYYY/MM" の前月を計算する（年またぎを考慮）
