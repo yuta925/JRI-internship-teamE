@@ -21,6 +21,8 @@ public class HomeFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.fragment_home, container, false);
 
+        setupLoginBonus(v);
+
         // CSVから取引データを読み込む
         CsvReader parser = new CsvReader();
         String filename = "LocalFintechDateBase.txt";
@@ -88,6 +90,39 @@ public class HomeFragment extends Fragment {
         }
 
         return v;
+    }
+
+    // 本日のログインボーナスを表示する（連続ログイン日数はMain2ActivityがLoginActivityから受け取ったIntentのExtraを流用）
+    // ※連続ログイン日数はLoginActivityのデバッグ用強制設定（ログインボタン長押し）の値も反映される
+    private void setupLoginBonus(View v) {
+        int consecutiveDays = requireActivity().getIntent()
+                .getIntExtra(Main2Activity.EXTRA_CONSECUTIVE_LOGIN_DAYS, 0);
+
+        View cvLoginBonus = v.findViewById(R.id.cvLoginBonus);
+        if (consecutiveDays <= 0) {
+            cvLoginBonus.setVisibility(View.GONE);
+            return;
+        }
+
+        int points = calcLoginBonusPoints(consecutiveDays);
+        TextView tvLoginBonusMessage = v.findViewById(R.id.tvLoginBonusMessage);
+        tvLoginBonusMessage.setText(getString(R.string.home_login_bonus_message, points));
+        cvLoginBonus.setVisibility(View.VISIBLE);
+    }
+
+    // 連続ログイン日数に応じたボーナスポイントをざっくり算出する
+    private int calcLoginBonusPoints(int consecutiveDays) {
+        if (consecutiveDays >= 30) {
+            return 100;
+        } else if (consecutiveDays >= 14) {
+            return 50;
+        } else if (consecutiveDays >= 7) {
+            return 30;
+        } else if (consecutiveDays >= 3) {
+            return 20;
+        } else {
+            return 10;
+        }
     }
 
     // "YYYY/MM" の前月を計算する（年またぎを考慮）

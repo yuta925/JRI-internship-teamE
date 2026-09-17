@@ -40,4 +40,6 @@
     <string name="home_total_assets">"総資産"</string>
     <string name="home_savings">"今月の貯金"</string>
     <string name="home_month_over_month_prefix">"前月比 "</string>
+    <string name="home_login_bonus_title">"ログインボーナス"</string>
+    <string name="home_login_bonus_message">"本日のログインで%dptを獲得しました！"</string>
 </resources>
