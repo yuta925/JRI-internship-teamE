@@ -6,12 +6,13 @@
     android:orientation="vertical"
     android:background="@color/finBackground">
 
-    <!-- ヘッダー -->
+    <!-- ヘッダー (背景色を修正) -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/finHeader"
-        android:padding="8dp">
+        android:background="@color/finCard"
+        android:padding="8dp"
+        android:elevation="2dp">
 
         <ImageButton
             android:id="@+id/btnBack"
@@ -23,13 +24,13 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/finHeaderText" />
+            app:tint="@color/finTextPrimary" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="カテゴリ別内訳"
-            android:textColor="@color/finHeaderText"
+            android:textColor="@color/finTextPrimary"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -38,28 +39,40 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout
+    <!-- カテゴリ切り替えボタン -->
+    <HorizontalScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:scrollbars="none"
+        android:background="@color/finCard">
+
+        <LinearLayout
+            android:id="@+id/llCategoryButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="4dp" />
+    </HorizontalScrollView>
+
+    <TextView
+        android:id="@+id/tvSelectedCategoryTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:padding="16dp"
-        android:gravity="center">
+        android:text="カテゴリを選択してください"
+        android:textColor="@color/finTextPrimary"
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="カテゴリ別内訳画面（仮）"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/finTextPrimary" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="ここでは詳細なカテゴリ別の分析が表示される予定です。"
-            android:textColor="@color/finTextMuted"
-            android:gravity="center" />
-    </LinearLayout>
+    <!-- 取引明細リスト -->
+    <ListView
+        android:id="@+id/lvCategoryTransactions"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@null"
+        android:padding="8dp"
+        android:clipToPadding="false" />
 
 </LinearLayout>

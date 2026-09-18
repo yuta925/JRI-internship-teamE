@@ -66,6 +66,11 @@ public class Main2Activity extends AppCompatActivity {
         // ボトムナビゲーションの選択とViewPager2の表示ページを同期する
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setOnItemSelectedListener(item -> {
+            // カテゴリ詳細などのサブ画面が表示されている場合は、それらを閉じてタブを切り替える
+            while (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                getSupportFragmentManager().popBackStackImmediate();
+            }
+
             int position;
             if (item.getItemId() == R.id.nav_home) {
                 position = 0;
