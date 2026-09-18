@@ -128,7 +128,7 @@ public class AnalysisFragment extends Fragment {
         // カテゴリ別内訳ボタンの設定
         v.findViewById(R.id.btnCategoryDetail).setOnClickListener(view -> {
             getParentFragmentManager().beginTransaction()
-                    .replace(R.id.main2_root, new CategoryDetailFragment())
+                    .replace(R.id.content_container, new CategoryDetailFragment())
                     .addToBackStack(null)
                     .commit();
         });
