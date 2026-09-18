@@ -3,8 +3,10 @@ package jp.co.jri.internship.fintech_sample1.login;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -14,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.StringRes;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -22,6 +25,11 @@ import jp.co.jri.internship.fintech_sample1.Main2Activity;
 import jp.co.jri.internship.fintech_sample1.R;
 
 public class LoginActivity extends AppCompatActivity {
+
+    // ▼▼▼ デバッグ用: 連続ログイン日数を強制的に上書きするための設定（確認後は削除すること） ▼▼▼
+    private static final String DEBUG_PREFS_NAME = "debug_prefs";
+    private static final String KEY_FORCED_STREAK = "forced_consecutive_login_days";
+    // ▲▲▲ デバッグ用ここまで ▲▲▲
 
     private LoginViewModel loginViewModel;
     private Context mContext;
@@ -121,11 +129,55 @@ public class LoginActivity extends AppCompatActivity {
                     passwordEditText.getText().toString(),
                     mContext);
         });
+
+        // ▼▼▼ デバッグ用: ログインボタン長押しで連続ログイン日数の強制設定ダイアログを表示（確認後は削除すること） ▼▼▼
+        loginButton.setOnLongClickListener(v -> {
+            showDebugForceStreakDialog();
+            return true;
+        });
+        // ▲▲▲ デバッグ用ここまで ▲▲▲
     }
+
+    // ▼▼▼ デバッグ用: 連続ログイン日数を強制的に指定するダイアログ（確認後は削除すること） ▼▼▼
+    private void showDebugForceStreakDialog() {
+        SharedPreferences prefs = getSharedPreferences(DEBUG_PREFS_NAME, MODE_PRIVATE);
+        int currentForced = prefs.getInt(KEY_FORCED_STREAK, -1);
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.setHint("例：5（空欄で解除）");
+        if (currentForced >= 0) {
+            input.setText(String.valueOf(currentForced));
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("【デバッグ】連続ログイン日数を強制設定")
+                .setMessage("次回ログイン成功時に、実際の計算値の代わりにここで指定した日数を使用します。空欄で「解除」を押すと通常の計算に戻ります。")
+                .setView(input)
+                .setPositiveButton("設定", (dialog, which) -> {
+                    String text = input.getText().toString().trim();
+                    SharedPreferences.Editor editor = prefs.edit();
+                    if (text.isEmpty()) {
+                        editor.remove(KEY_FORCED_STREAK);
+                        Toast.makeText(this, "【デバッグ】強制設定を解除しました", Toast.LENGTH_SHORT).show();
+                    } else {
+                        editor.putInt(KEY_FORCED_STREAK, Integer.parseInt(text));
+                        Toast.makeText(this, "【デバッグ】連続ログイン日数を" + text + "日に強制設定しました", Toast.LENGTH_SHORT).show();
+                    }
+                    editor.apply();
+                })
+                .setNegativeButton("キャンセル", null)
+                .show();
+    }
+    // ▲▲▲ デバッグ用ここまで ▲▲▲
 
     // ログイン認証が成功したとき
     private void updateUiWithUser(LoggedInUserView model) {
-        int consecutiveLoginDays = model.getConsecutiveLoginDays();
+        // ▼▼▼ デバッグ用: 強制設定があれば実際の計算値の代わりに使用（確認後は削除すること） ▼▼▼
+        int actualStreak = model.getConsecutiveLoginDays();
+        int forcedStreak = getSharedPreferences(DEBUG_PREFS_NAME, MODE_PRIVATE).getInt(KEY_FORCED_STREAK, -1);
+        int consecutiveLoginDays = forcedStreak >= 0 ? forcedStreak : actualStreak;
+        // ▲▲▲ デバッグ用ここまで ▲▲▲
 
         // ログインボーナスのポイントを計算し、総ポイント数に加算する
         if (consecutiveLoginDays > 0) {
