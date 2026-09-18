@@ -51,4 +51,10 @@
     <string name="target_savings_input_title">"目標貯金額の入力"</string>
     <string name="ok">"OK"</string>
     <string name="cancel">"キャンセル"</string>
+
+    <!-- 貯金目標達成キャラクター -->
+    <string name="home_savings_character_description">"貯金目標の達成度を表すキャラクター"</string>
+
+    <!-- 支出目標達成キャラクター -->
+    <string name="home_budget_character_description">"支出目標の達成度を表すキャラクター"</string>
 </resources>

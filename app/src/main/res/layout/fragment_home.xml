@@ -272,47 +272,47 @@
             app:cardElevation="4dp"
             app:cardBackgroundColor="@color/finCard">
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:padding="20dp">
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignTop="@id/btnSetTarget"
+                    android:layout_alignBottom="@id/btnSetTarget"
+                    android:gravity="center_vertical"
+                    android:text="今月の目標支出額"
+                    android:textColor="@color/finTextMuted"
+                    android:textSize="14sp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        android:text="今月の目標支出額"
-                        android:textColor="@color/finTextMuted"
-                        android:textSize="14sp" />
-
-                    <Button
-                        android:id="@+id/btnSetTarget"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:text="@string/home_set_target"
-                        android:textSize="12sp" />
-                </RelativeLayout>
+                <Button
+                    android:id="@+id/btnSetTarget"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/home_set_target"
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/tvTargetBudget"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_below="@id/btnSetTarget"
                     android:layout_marginTop="4dp"
                     android:textColor="@color/finTextPrimary"
                     android:textSize="24sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvMaxSpendingRateLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_below="@id/tvTargetBudget"
                     android:layout_marginTop="16dp"
                     android:text="@string/home_max_spending_rate"
                     android:textColor="@color/finTextMuted"
@@ -321,6 +321,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_below="@id/tvMaxSpendingRateLabel"
                     android:layout_marginTop="8dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
@@ -343,7 +344,18 @@
                         android:textSize="16sp"
                         android:textStyle="bold" />
                 </LinearLayout>
-            </LinearLayout>
+
+                <!-- 「目標を設定」の左下あたりにキャラクターの頭がくるように、金額欄の高さに重ねて配置する -->
+                <ImageView
+                    android:id="@+id/ivBudgetCharacter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="68dp"
+                    android:layout_alignTop="@id/tvTargetBudget"
+                    android:layout_alignStart="@id/btnSetTarget"
+                    android:visibility="gone"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@string/home_budget_character_description" />
+            </RelativeLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <!-- 目標貯金カード -->
@@ -355,47 +367,47 @@
             app:cardElevation="4dp"
             app:cardBackgroundColor="@color/finCard">
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:padding="20dp">
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignTop="@id/btnSetTargetSavings"
+                    android:layout_alignBottom="@id/btnSetTargetSavings"
+                    android:gravity="center_vertical"
+                    android:text="@string/home_target_savings"
+                    android:textColor="@color/finTextMuted"
+                    android:textSize="14sp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        android:text="@string/home_target_savings"
-                        android:textColor="@color/finTextMuted"
-                        android:textSize="14sp" />
-
-                    <Button
-                        android:id="@+id/btnSetTargetSavings"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:text="@string/home_set_target"
-                        android:textSize="12sp" />
-                </RelativeLayout>
+                <Button
+                    android:id="@+id/btnSetTargetSavings"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/home_set_target"
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/tvTargetSavings"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_below="@id/btnSetTargetSavings"
                     android:layout_marginTop="4dp"
                     android:textColor="@color/finTextPrimary"
                     android:textSize="24sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvSavingsRateLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_below="@id/tvTargetSavings"
                     android:layout_marginTop="16dp"
                     android:text="@string/home_achievement_rate"
                     android:textColor="@color/finTextMuted"
@@ -404,6 +416,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_below="@id/tvSavingsRateLabel"
                     android:layout_marginTop="8dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
@@ -426,7 +439,18 @@
                         android:textSize="16sp"
                         android:textStyle="bold" />
                 </LinearLayout>
-            </LinearLayout>
+
+                <!-- 「目標を設定」の左下あたりにキャラクターの頭がくるように、金額欄の高さに重ねて配置する -->
+                <ImageView
+                    android:id="@+id/ivSavingsCharacter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="68dp"
+                    android:layout_alignTop="@id/tvTargetSavings"
+                    android:layout_alignStart="@id/btnSetTargetSavings"
+                    android:visibility="gone"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@string/home_savings_character_description" />
+            </RelativeLayout>
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
