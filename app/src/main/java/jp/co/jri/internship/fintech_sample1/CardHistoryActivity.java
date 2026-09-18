@@ -19,6 +19,7 @@ public class CardHistoryActivity extends AppCompatActivity {
     private List<FintechData> cardData;
     private List<String> months;
     private int currentIndex;
+    private CardMonthlyAdapter cardMonthlyAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,8 +99,15 @@ public class CardHistoryActivity extends AppCompatActivity {
 
         ((TextView) findViewById(R.id.tvCardMonthlyTotal))
                 .setText(String.format("¥%,d", monthlyTotal));
-        ((ListView) findViewById(R.id.lvCardMonthlyHistory))
-                .setAdapter(new CardMonthlyAdapter(this, monthData));
+        ListView listView = findViewById(R.id.lvCardMonthlyHistory);
+        cardMonthlyAdapter = new CardMonthlyAdapter(this, monthData);
+        listView.setAdapter(cardMonthlyAdapter);
+        listView.setOnItemClickListener((parent, view, position, id) ->
+                TransactionMemoHelper.showDialog(this, monthData.get(position), () -> {
+                    if (cardMonthlyAdapter != null) {
+                        cardMonthlyAdapter.notifyDataSetChanged();
+                    }
+                }));
     }
 
     private static class CardMonthlyAdapter extends ArrayAdapter<FintechData> {
@@ -124,6 +132,7 @@ public class CardHistoryActivity extends AppCompatActivity {
                     .setText(data.getContent() + "/" + data.getSupplier());
             ((TextView) view.findViewById(R.id.tvList3))
                     .setText(String.format("¥%,d", -data.getAmount()));
+            TransactionMemoHelper.bindMemo(view, data);
             return view;
         }
     }
