@@ -58,6 +58,12 @@ public class AnalysisFragment extends Fragment {
             Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_analysis, container, false);
+        View btnCategoryDetail = v.findViewById(R.id.btnCategoryDetail);
+        int permissionLevel = requireActivity().getIntent()
+                .getIntExtra(Main2Activity.EXTRA_PERMISSION_LEVEL, 1);
+        if (permissionLevel == 3) {
+            btnCategoryDetail.setVisibility(View.GONE);
+        }
 
         CsvReader parser = new CsvReader();
         String filename = "LocalFintechDateBase_v4.txt";
@@ -126,12 +132,14 @@ public class AnalysisFragment extends Fragment {
         setupCombinedChart(v, 6); // 初期は直近6ヶ月
 
         // カテゴリ別内訳ボタンの設定
-        v.findViewById(R.id.btnCategoryDetail).setOnClickListener(view -> {
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.content_container, new CategoryDetailFragment())
-                    .addToBackStack(null)
-                    .commit();
-        });
+        if (permissionLevel != 3) {
+            btnCategoryDetail.setOnClickListener(view -> {
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.content_container, new CategoryDetailFragment())
+                        .addToBackStack(null)
+                        .commit();
+            });
+        }
 
         // レンジ切り替えボタンの設定
         MaterialButtonToggleGroup toggleRange = v.findViewById(R.id.toggleRange);

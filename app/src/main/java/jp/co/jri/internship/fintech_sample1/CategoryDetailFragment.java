@@ -26,6 +26,7 @@ public class CategoryDetailFragment extends Fragment {
     private LinearLayout llCategoryButtons;
     private ListView lvCategoryTransactions;
     private TextView tvSelectedCategoryTitle;
+    private TransactionAdapter transactionAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -108,7 +109,14 @@ public class CategoryDetailFragment extends Fragment {
         }
         // 新しい順に表示
         Collections.reverse(filteredData);
-        lvCategoryTransactions.setAdapter(new TransactionAdapter(requireContext(), filteredData));
+        transactionAdapter = new TransactionAdapter(requireContext(), filteredData);
+        lvCategoryTransactions.setAdapter(transactionAdapter);
+        lvCategoryTransactions.setOnItemClickListener((parent, view, position, id) ->
+                TransactionMemoHelper.showDialog(requireContext(), filteredData.get(position), () -> {
+                    if (transactionAdapter != null) {
+                        transactionAdapter.notifyDataSetChanged();
+                    }
+                }));
     }
 
     private static class TransactionAdapter extends ArrayAdapter<FintechData> {
@@ -136,6 +144,7 @@ public class CategoryDetailFragment extends Fragment {
                 } else {
                     tvAmount.setTextColor(ContextCompat.getColor(getContext(), R.color.finPositive));
                 }
+                TransactionMemoHelper.bindMemo(view, data);
             }
             return view;
         }
