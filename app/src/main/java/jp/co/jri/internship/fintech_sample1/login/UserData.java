@@ -8,7 +8,7 @@ public class UserData {
     private final String userId;
     private final String password;
     private final String displayName;
-    private final int permissionLevel; // 1: 全て許可, 2: 資金移動不可, 3: 残高とグラフのみ
+    private final int permissionLevel; // 1: 全て許可, 2: 資金移動のみ不可, 3: 閲覧のみ可能
     private final String parentUserId; // 追加した親ユーザーのID
 
     public UserData(String userId, String password, String displayName, int permissionLevel, String parentUserId) {

@@ -15,6 +15,14 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        // ユーザー登録は「全て許可」(権限レベル1)のユーザーのみ可能
+        int permissionLevel = getIntent().getIntExtra(Main2Activity.EXTRA_PERMISSION_LEVEL, 1);
+        if (permissionLevel != 1) {
+            Toast.makeText(this, "この操作は「全て許可」の権限を持つユーザーのみ実行できます", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("ユーザ追加登録");
         }
@@ -86,19 +94,19 @@ public class RegisterActivity extends AppCompatActivity {
             }
 
             // 4. 権限レベルの取得
-            int permissionLevel = 1;
+            int newUserPermissionLevel = 1;
             int checkedId = rgPermission.getCheckedRadioButtonId();
             if (checkedId == R.id.rbLevel2) {
-                permissionLevel = 2;
+                newUserPermissionLevel = 2;
             } else if (checkedId == R.id.rbLevel3) {
-                permissionLevel = 3;
+                newUserPermissionLevel = 3;
             }
 
             // 5. 保存
             String parentUserId = getIntent().getStringExtra(Main2Activity.EXTRA_USER_ID);
             if (parentUserId == null) parentUserId = "none";
-            
-            UserData newUser = new UserData(userId, password, displayName, permissionLevel, parentUserId);
+
+            UserData newUser = new UserData(userId, password, displayName, newUserPermissionLevel, parentUserId);
             reader.appendUser(this, newUser);
 
             Toast.makeText(this, "登録が完了しました", Toast.LENGTH_SHORT).show();

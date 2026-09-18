@@ -156,6 +156,30 @@ public class CsvReader {
         }
     }
 
+    // 指定ユーザーの権限レベルを変更し、ローカルファイルへ書き戻す
+    public void updateUserPermission(Context context, String userId, int newPermissionLevel) {
+        String filename = "LocalUserDataBase.txt";
+        readerUserDataBase(context);
+
+        StringBuilder sb = new StringBuilder();
+        for (UserData user : userObjects) {
+            int permission = user.getUserId().equals(userId) ? newPermissionLevel : user.getPermissionLevel();
+            sb.append(user.getUserId()).append(",")
+                    .append(user.getPassword()).append(",")
+                    .append(user.getDisplayName()).append(",")
+                    .append(permission).append(",")
+                    .append(user.getParentUserId()).append("\n");
+        }
+
+        try (FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE)) {
+            fos.write(sb.toString().getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            Log.e(TAG, "ユーザー権限更新エラー", e);
+        }
+
+        readerUserDataBase(context);
+    }
+
     // ログイン日時をCSV形式でローカルファイル(LoginHistory.csv)に追記する
     // 1行あたり "ユーザーID,表示名,ログイン日時" の形式
     public void appendLoginHistory(Context context, String userId, String displayName) {

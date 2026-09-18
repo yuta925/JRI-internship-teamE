@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -28,11 +27,8 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
-import com.github.mikephil.charting.formatter.PercentFormatter;
 
 import com.github.mikephil.charting.formatter.ValueFormatter;
-import com.github.mikephil.charting.highlight.Highlight;
-import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.text.ParseException;
@@ -45,7 +41,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
-//コメント
+
 public class AnalysisFragment extends Fragment {
 
     private List<FintechData> allData;
@@ -60,6 +56,12 @@ public class AnalysisFragment extends Fragment {
             Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_analysis, container, false);
+        View btnCategoryDetail = v.findViewById(R.id.btnCategoryDetail);
+        int permissionLevel = requireActivity().getIntent()
+                .getIntExtra(Main2Activity.EXTRA_PERMISSION_LEVEL, 1);
+        if (permissionLevel == 3) {
+            btnCategoryDetail.setVisibility(View.GONE);
+        }
 
         CsvReader parser = new CsvReader();
         String filename = "LocalFintechDateBase_v4.txt";
@@ -98,7 +100,6 @@ public class AnalysisFragment extends Fragment {
                 }
             }
         } catch (ParseException e) {
-            // 解析エラー時は従来通りデータのある月のみ
             TreeMap<String, Integer> monthsMap = new TreeMap<>();
             for (String m : allMonths) monthsMap.put(m, 0);
             monthList = new ArrayList<>(monthsMap.keySet());
@@ -106,7 +107,6 @@ public class AnalysisFragment extends Fragment {
 
         currentMonthIndex = monthList.size() - 1; // 初期表示は最新月
 
-        // 月切り替えボタンの設定
         ImageButton btnPrev = v.findViewById(R.id.btnPrevMonth);
         ImageButton btnNext = v.findViewById(R.id.btnNextMonth);
 
@@ -126,6 +126,16 @@ public class AnalysisFragment extends Fragment {
 
         updatePieChart(v);
         setupCharts(v, 6); // 初期は直近6ヶ月
+
+        // カテゴリ別内訳ボタンの設定
+        if (permissionLevel != 3) {
+            btnCategoryDetail.setOnClickListener(view -> {
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.content_container, new CategoryDetailFragment())
+                        .addToBackStack(null)
+                        .commit();
+            });
+        }
 
         // レンジ切り替えボタンの設定
         MaterialButtonToggleGroup toggleRange = v.findViewById(R.id.toggleRange);
@@ -148,7 +158,6 @@ public class AnalysisFragment extends Fragment {
         TextView tvHeaderTitle = v.findViewById(R.id.tvHeaderTitle);
         tvHeaderTitle.setText("分析（" + currentMonth + "）");
 
-        // 前後ボタンの有効/無効切り替え
         ImageButton btnPrev = v.findViewById(R.id.btnPrevMonth);
         ImageButton btnNext = v.findViewById(R.id.btnNextMonth);
         btnPrev.setEnabled(currentMonthIndex > 0);
@@ -156,7 +165,6 @@ public class AnalysisFragment extends Fragment {
         btnPrev.setAlpha(currentMonthIndex > 0 ? 1.0f : 0.3f);
         btnNext.setAlpha(currentMonthIndex < monthList.size() - 1 ? 1.0f : 0.3f);
 
-        // 用途分類ごとの支出合計を集計
         int totalExpense = 0;
         Map<String, Integer> expenseByUse = new LinkedHashMap<>();
         for (FintechData data : allData) {
@@ -164,7 +172,7 @@ public class AnalysisFragment extends Fragment {
                 continue;
             }
             if (data.getAmount() >= 0) {
-                continue; // 収入は支出内訳に含めない
+                continue;
             }
             String use = data.getUse();
             int abs = -data.getAmount();
@@ -203,7 +211,6 @@ public class AnalysisFragment extends Fragment {
             entries.add(new PieEntry(amount, category));
             colors.add(color);
 
-            // 右側の凡例セクションにアイテムを追加
             View itemView = inflater.inflate(R.layout.item_analysis_category, legendContainer, false);
             itemView.findViewById(R.id.viewCategoryColor).setBackgroundColor(color);
             ((TextView) itemView.findViewById(R.id.tvCategoryName)).setText(category);
@@ -212,14 +219,13 @@ public class AnalysisFragment extends Fragment {
             legendContainer.addView(itemView);
         }
 
-        // 円グラフ中央に合計金額を表示
         pieChart.setCenterText("合計支出\n" + String.format(Locale.JAPAN, "%,d", totalExpense) + "円");
         pieChart.setCenterTextSize(14f);
         pieChart.setDrawCenterText(true);
 
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColors(colors);
-        dataSet.setDrawValues(false); // グラフ上の数値を非表示（右側に表示するため）
+        dataSet.setDrawValues(false);
         dataSet.setSliceSpace(2f);
 
         PieData pieData = new PieData(dataSet);
@@ -228,13 +234,12 @@ public class AnalysisFragment extends Fragment {
         pieChart.getDescription().setEnabled(false);
         pieChart.setHoleRadius(55f);
         pieChart.setTransparentCircleRadius(60f);
-        pieChart.setDrawEntryLabels(false); // グラフ上のラベルを非表示
-        pieChart.getLegend().setEnabled(false); // 標準の凡例を非表示（自作したものを使うため）
+        pieChart.setDrawEntryLabels(false);
+        pieChart.getLegend().setEnabled(false);
         pieChart.animateY(600);
         pieChart.invalidate();
     }
 
-    // 月ごとの収入・支出・貯蓄をグラフで表示する
     private void setupCharts(View v, int monthRange) {
         // 月ごとに収入・支出を集計
         Map<String, int[]> monthly = new TreeMap<>();
@@ -299,12 +304,12 @@ public class AnalysisFragment extends Fragment {
         BarDataSet incomeSet = new BarDataSet(incomeEntries, "収入");
         incomeSet.setColor(ContextCompat.getColor(requireContext(), R.color.finIncome));
         incomeSet.setValueTextSize(9f);
-        incomeSet.setDrawValues(true); // 常時表示
+        incomeSet.setDrawValues(true);
 
         BarDataSet expenseSet = new BarDataSet(expenseEntries, "支出");
         expenseSet.setColor(ContextCompat.getColor(requireContext(), R.color.finExpense));
         expenseSet.setValueTextSize(9f);
-        expenseSet.setDrawValues(true); // 常時表示
+        expenseSet.setDrawValues(true);
 
         BarData barData = new BarData(incomeSet, expenseSet);
         barData.setValueFormatter(new ValueFormatter() {
@@ -330,18 +335,6 @@ public class AnalysisFragment extends Fragment {
         barChart.getAxisLeft().setDrawGridLines(true);
         barChart.getLegend().setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
         barChart.getLegend().setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-
-        // タップ時のイベントリスナー
-        barChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
-            @Override
-            public void onValueSelected(Entry e, Highlight h) {
-                // 常時表示のため何もしない（円グラフを変化させない仕様を維持）
-            }
-
-            @Override
-            public void onNothingSelected() {}
-        });
-
         barChart.animateY(600);
         barChart.invalidate();
 
@@ -352,7 +345,7 @@ public class AnalysisFragment extends Fragment {
         savingsSet.setLineWidth(3f);
         savingsSet.setCircleColor(ContextCompat.getColor(requireContext(), R.color.finSavings));
         savingsSet.setCircleRadius(5f);
-        savingsSet.setDrawValues(true); // 常時表示
+        savingsSet.setDrawValues(true);
         savingsSet.setValueTextSize(9f);
         savingsSet.setDrawFilled(true);
         savingsSet.setFillColor(ContextCompat.getColor(requireContext(), R.color.finSavings));
@@ -380,18 +373,6 @@ public class AnalysisFragment extends Fragment {
         lineChart.getAxisLeft().setDrawGridLines(true);
         lineChart.getLegend().setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
         lineChart.getLegend().setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-
-        // タップ時のイベントリスナー
-        lineChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
-            @Override
-            public void onValueSelected(Entry e, Highlight h) {
-                // 常時表示のため何もしない（円グラフを変化させない仕様を維持）
-            }
-
-            @Override
-            public void onNothingSelected() {}
-        });
-
         lineChart.animateY(600);
         lineChart.invalidate();
     }

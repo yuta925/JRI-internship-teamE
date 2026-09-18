@@ -55,6 +55,8 @@ public class HomeFragment extends Fragment {
             Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_home, container, false);
+        int permissionLevel = requireActivity().getIntent()
+                .getIntExtra(Main2Activity.EXTRA_PERMISSION_LEVEL, 1);
 
         setupLoginBonus(v);
         setupTotalPoints(v);
@@ -73,8 +75,12 @@ public class HomeFragment extends Fragment {
         TextView tvSavings = v.findViewById(R.id.tvSavings);
         TextView tvCardTotal = v.findViewById(R.id.tvCardTotal);
         Button btnCardDetails = v.findViewById(R.id.btnCardDetails);
-        btnCardDetails.setOnClickListener(view -> startActivity(
-                new Intent(requireContext(), CardHistoryActivity.class)));
+        if (permissionLevel == 3) {
+            btnCardDetails.setVisibility(View.GONE);
+        } else {
+            btnCardDetails.setOnClickListener(view -> startActivity(
+                    new Intent(requireContext(), CardHistoryActivity.class)));
+        }
 
         // 新しく追加したUIコンポーネント
         tvTargetBudget = v.findViewById(R.id.tvTargetBudget);
@@ -158,8 +164,7 @@ public class HomeFragment extends Fragment {
 
         // 送金ボタンの権限制御
         Button btnTransfer = v.findViewById(R.id.btnTransfer);
-        int permissionLevel = requireActivity().getIntent().getIntExtra(Main2Activity.EXTRA_PERMISSION_LEVEL, 1);
-        
+
         if (permissionLevel >= 2) {
             // レベル2と3は送金不可（無効化）
             btnTransfer.setEnabled(false);

@@ -47,7 +47,7 @@ public class Main2Activity extends AppCompatActivity {
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> { });
 
     // 特別な画像付きポップアップを表示する連続ログイン日数
-    private static final int LOGIN_STREAK_SPECIAL_100 = 100;
+    private static final int LOGIN_STREAK_SPECIAL_IMAGE = 2;
     private static final int LOGIN_STREAK_SPECIAL_365 = 365;
 
     @Override
@@ -143,9 +143,9 @@ public class Main2Activity extends AppCompatActivity {
         if (consecutiveLoginDays == LOGIN_STREAK_SPECIAL_365) {
             showImagePopup(R.drawable.login_bonus_365days,
                     "365日連続ログイン達成！\nおめでとうございます！");
-        } else if (consecutiveLoginDays == LOGIN_STREAK_SPECIAL_100) {
+        } else if (consecutiveLoginDays == LOGIN_STREAK_SPECIAL_IMAGE) {
             showImagePopup(R.drawable.login_bonus_100days,
-                    "100日連続ログイン達成！");
+                    consecutiveLoginDays + "日連続ログイン達成！");
         } else if (consecutiveLoginDays % LOGIN_STREAK_MILESTONE == 0) {
             new AlertDialog.Builder(this)
                     .setTitle("継続ログイン達成")

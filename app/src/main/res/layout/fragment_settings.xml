@@ -24,6 +24,15 @@
         app:backgroundTint="@color/smbcFreshGreen" />
 
     <Button
+        android:id="@+id/btnManageUserPermission"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ユーザー権限管理"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp"
+        app:backgroundTint="@color/smbcFreshGreen" />
+
+    <Button
         android:id="@+id/btnLogout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
