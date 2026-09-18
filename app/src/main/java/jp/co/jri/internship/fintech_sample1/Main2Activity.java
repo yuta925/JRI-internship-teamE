@@ -3,6 +3,8 @@ package jp.co.jri.internship.fintech_sample1;
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,8 +33,10 @@ public class Main2Activity extends AppCompatActivity {
     // ポップアップを表示する連続ログイン日数の間隔（5日ごと）
     private static final int LOGIN_STREAK_MILESTONE = 5;
 
-    // 貯金目標（現状は固定値。目標設定機能が未実装のため月ごとの目標額として仮置きしている）
-    private static final int SAVINGS_GOAL = 100000;
+    // ホーム画面で設定した支出・貯金目標を通知にも使用する
+    private static final String PREFS_NAME = "FintechPrefs";
+    private static final String KEY_TARGET_BUDGET = "target_budget";
+    private static final String KEY_TARGET_SAVINGS = "target_savings";
     private static final String GOAL_CHANNEL_ID = "goal_progress_channel";
     private static final int GOAL_NOTIFICATION_ID = 1001;
 
@@ -132,7 +136,7 @@ public class Main2Activity extends AppCompatActivity {
     // ログイン直後（この画面の起動時）に一度だけ、目標に対する現在の達成状況をプッシュ通知する
     private void notifyGoalProgressOnce() {
         CsvReader parser = new CsvReader();
-        String filename = "LocalFintechDateBase.txt";
+        String filename = "LocalFintechDateBase_v4.txt";
         boolean localFileExists = getFileStreamPath(filename).exists();
         parser.readerFintechDataBase(this, localFileExists);
         List<FintechData> allData = parser.fintechObjects;
@@ -141,14 +145,23 @@ public class Main2Activity extends AppCompatActivity {
         }
 
         String currentMonth = allData.get(allData.size() - 1).getTransDate().substring(0, 7);
-        int savings = 0;
+        int income = 0;
+        int expense = 0;
         for (FintechData data : allData) {
             if (data.getTransDate().substring(0, 7).equals(currentMonth)) {
-                savings += data.getAmount();
+                if (data.getAmount() >= 0) {
+                    income += data.getAmount();
+                } else {
+                    expense += -data.getAmount();
+                }
             }
         }
 
-        int achievementRate = Math.min(100, Math.max(0, savings * 100 / SAVINGS_GOAL));
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        int targetBudget = prefs.getInt(KEY_TARGET_BUDGET, 0);
+        int targetSavings = prefs.getInt(KEY_TARGET_SAVINGS, 0);
+        int budgetRate = calculateAchievementRate(expense, targetBudget);
+        int savingsRate = calculateAchievementRate(income - expense, targetSavings);
 
         createGoalNotificationChannel();
 
@@ -159,7 +172,7 @@ public class Main2Activity extends AppCompatActivity {
             return;
         }
 
-        String message = getString(R.string.goal_notification_text, achievementRate);
+        String message = getString(R.string.goal_notification_text, budgetRate, savingsRate);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, GOAL_CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentTitle(getString(R.string.goal_notification_title))
@@ -169,6 +182,13 @@ public class Main2Activity extends AppCompatActivity {
                 .setTimeoutAfter(5000);
 
         NotificationManagerCompat.from(this).notify(GOAL_NOTIFICATION_ID, builder.build());
+    }
+
+    private int calculateAchievementRate(int amount, int target) {
+        if (target <= 0) {
+            return 0;
+        }
+        return Math.max(0, (int) ((amount * 100.0) / target));
     }
 
     private void createGoalNotificationChannel() {
