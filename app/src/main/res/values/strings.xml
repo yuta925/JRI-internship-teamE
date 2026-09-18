@@ -23,6 +23,9 @@
     <string name="list1" tools:ignore="Typos">"List1"</string>
     <string name="list2">"List2"</string>
     <string name="list3">"List3"</string>
+    <string name="transaction_memo_title">取引メモ</string>
+    <string name="transaction_memo_save">保存</string>
+    <string name="transaction_memo_display">メモ：%1$s</string>
 
     <!-- タブタイトル -->
     <string name="tab_home">"ホーム"</string>
