@@ -18,9 +18,10 @@
         android:id="@+id/btnRegisterUser"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="ユーザー追加登録"
+        android:text="ユーザ追加登録"
         android:padding="16dp"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        app:backgroundTint="@color/smbcFreshGreen" />
 
     <Button
         android:id="@+id/btnLogout"

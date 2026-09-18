@@ -20,6 +20,8 @@ public class SettingsFragment extends Fragment {
         Button btnRegisterUser = v.findViewById(R.id.btnRegisterUser);
         btnRegisterUser.setOnClickListener(view -> {
             Intent intent = new Intent(getActivity(), RegisterActivity.class);
+            String userId = getActivity().getIntent().getStringExtra(Main2Activity.EXTRA_USER_ID);
+            intent.putExtra(Main2Activity.EXTRA_USER_ID, userId);
             startActivity(intent);
         });
 

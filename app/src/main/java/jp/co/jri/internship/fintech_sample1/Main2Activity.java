@@ -28,6 +28,7 @@ public class Main2Activity extends AppCompatActivity {
     // LoginActivityから連続ログイン日数を受け取るためのIntentキー
     public static final String EXTRA_CONSECUTIVE_LOGIN_DAYS = "extra_consecutive_login_days";
     public static final String EXTRA_PERMISSION_LEVEL = "extra_permission_level";
+    public static final String EXTRA_USER_ID = "extra_user_id";
 
     // ポップアップを表示する連続ログイン日数の間隔（5日ごと）
     private static final int LOGIN_STREAK_MILESTONE = 5;
