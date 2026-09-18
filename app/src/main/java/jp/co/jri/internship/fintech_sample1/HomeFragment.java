@@ -26,7 +26,7 @@ public class HomeFragment extends Fragment {
 
         // CSVから取引データを読み込む
         CsvReader parser = new CsvReader();
-        String filename = "LocalFintechDateBase.txt";
+        String filename = "LocalFintechDateBase_v4.txt";
         boolean localFileExists = requireContext().getFileStreamPath(filename).exists();
         parser.readerFintechDataBase(requireContext(), localFileExists);
         List<FintechData> allData = parser.fintechObjects;

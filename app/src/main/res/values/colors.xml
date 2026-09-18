@@ -20,9 +20,9 @@
     <color name="finBonusText">#8A6D00</color>
 
     <!-- 分析グラフ用（用途分類ごとの色） -->
-    <color name="finCatLiving">#2E7D32</color>
-    <color name="finCatFun">#F9A825</color>
-    <color name="finCatInvest">#1565C0</color>
-    <color name="finCatSavings">#6A1B9A</color>
+    <color name="finCatFood">#2E7D32</color>
+    <color name="finCatHobby">#F9A825</color>
+    <color name="finCatTransport">#1565C0</color>
+    <color name="finCatFashion">#6A1B9A</color>
     <color name="finCatOther">#78909C</color>
 </resources>

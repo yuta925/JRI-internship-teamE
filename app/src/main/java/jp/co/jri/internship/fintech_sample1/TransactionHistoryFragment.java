@@ -32,7 +32,7 @@ public class TransactionHistoryFragment extends Fragment {
 
         // データの読み込み（FintechDataBase.csv → ローカルファイル LocalFintechDateBase.txt 経由）
         CsvReader parser = new CsvReader();
-        String filename = "LocalFintechDateBase.txt";
+        String filename = "LocalFintechDateBase_v4.txt";
         requireContext().deleteFile(filename);
         boolean localFileExists = requireContext().getFileStreamPath(filename).exists();
         parser.readerFintechDataBase(requireContext(), localFileExists);
