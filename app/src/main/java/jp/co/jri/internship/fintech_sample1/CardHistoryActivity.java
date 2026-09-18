@@ -29,6 +29,8 @@ public class CardHistoryActivity extends AppCompatActivity {
             getSupportActionBar().hide();
         }
 
+        findViewById(R.id.btnBackCardHistory).setOnClickListener(v -> finish());
+
         CsvReader parser = new CsvReader();
         String filename = "LocalFintechDateBase_v4.txt";
         parser.readerFintechDataBase(this, getFileStreamPath(filename).exists());

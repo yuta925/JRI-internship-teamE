@@ -36,6 +36,8 @@ public class TransactionHistoryDetailActivity extends AppCompatActivity {
             getSupportActionBar().hide();
         }
 
+        findViewById(R.id.btnBackTransactionHistory).setOnClickListener(v -> finish());
+
         CsvReader parser = new CsvReader();
         String filename = "LocalFintechDateBase_v4.txt";
         boolean localFileExists = getFileStreamPath(filename).exists();
