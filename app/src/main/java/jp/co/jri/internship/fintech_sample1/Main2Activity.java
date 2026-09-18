@@ -26,10 +26,11 @@ import java.util.List;
 
 public class Main2Activity extends AppCompatActivity {
 
-    private static final String[] TAB_TITLES = {"ホーム", "分析", "取引履歴"};
+    private static final String[] TAB_TITLES = {"ホーム", "分析", "取引履歴", "設定"};
 
     // LoginActivityから連続ログイン日数を受け取るためのIntentキー
     public static final String EXTRA_CONSECUTIVE_LOGIN_DAYS = "extra_consecutive_login_days";
+    public static final String EXTRA_PERMISSION_LEVEL = "extra_permission_level";
 
     // ポップアップを表示する連続ログイン日数の間隔（5日ごと）
     private static final int LOGIN_STREAK_MILESTONE = 5;
@@ -61,8 +62,9 @@ public class Main2Activity extends AppCompatActivity {
         }
 
         // アダプタ(TapPagerAdapter)を用いてタブ切り替え時のViewPager2の内容表示を制御する
+        int permissionLevel = getIntent().getIntExtra(EXTRA_PERMISSION_LEVEL, 1);
         ViewPager2 pager = findViewById(R.id.pager);
-        TapPagerAdapter adapter = new TapPagerAdapter(this);
+        TapPagerAdapter adapter = new TapPagerAdapter(this, permissionLevel);
         pager.setAdapter(adapter);
 
         // TabLayoutとViewPager2を関連付ける（押下されたタブと内容表示を関連付ける）
@@ -70,7 +72,14 @@ public class Main2Activity extends AppCompatActivity {
         new TabLayoutMediator(
                 tabs,
                 pager,
-                (tab, position) -> tab.setText(TAB_TITLES[position])
+                (tab, position) -> {
+                    if (permissionLevel == 3) {
+                        String[] titlesLevel3 = {"ホーム", "分析", "設定"};
+                        tab.setText(titlesLevel3[position]);
+                    } else {
+                        tab.setText(TAB_TITLES[position]);
+                    }
+                }
         ).attach();
 
         showLoginStreakPopupIfNeeded();

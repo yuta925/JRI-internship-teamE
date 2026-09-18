@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="新規ユーザー登録"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp" />
+
+        <EditText
+            android:id="@+id/etUserId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="ユーザーID"
+            android:inputType="textEmailAddress"
+            android:importantForAutofill="no"
+            android:layout_marginBottom="16dp" />
+
+        <EditText
+            android:id="@+id/etDisplayName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="表示名（ニックネーム）"
+            android:inputType="text"
+            android:textColor="@color/finTextPrimary"
+            android:importantForAutofill="no"
+            android:layout_marginBottom="16dp" />
+
+        <EditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="パスワード"
+            android:inputType="textPassword"
+            android:layout_marginBottom="16dp" />
+
+        <EditText
+            android:id="@+id/etPasswordConfirm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="パスワード（確認用）"
+            android:inputType="textPassword"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="権限設定"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+
+        <RadioGroup
+            android:id="@+id/rgPermission"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp">
+
+            <RadioButton
+                android:id="@+id/rbLevel1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1: 全て許可"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/rbLevel2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2: 閲覧のみ（資金移動不可）" />
+
+            <RadioButton
+                android:id="@+id/rbLevel3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3: 制限付き（残高・グラフのみ）" />
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/btnSubmit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="登録する"
+            android:padding="12dp" />
+
+    </LinearLayout>
+</ScrollView>

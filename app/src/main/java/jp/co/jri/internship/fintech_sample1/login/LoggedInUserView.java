@@ -7,12 +7,13 @@ class LoggedInUserView {
     private final String displayName;
     private final int consecutiveLoginDays;
     private final String lastLoginDateTime;
-    //... other data fields that may be accessible to the UI
+    private final int permissionLevel;
 
-    LoggedInUserView(String displayName, int consecutiveLoginDays, String lastLoginDateTime) {
+    LoggedInUserView(String displayName, int consecutiveLoginDays, String lastLoginDateTime, int permissionLevel) {
         this.displayName = displayName;
         this.consecutiveLoginDays = consecutiveLoginDays;
         this.lastLoginDateTime = lastLoginDateTime;
+        this.permissionLevel = permissionLevel;
     }
 
     String getDisplayName() {
@@ -25,5 +26,9 @@ class LoggedInUserView {
 
     String getLastLoginDateTime() {
         return lastLoginDateTime;
+    }
+
+    int getPermissionLevel() {
+        return permissionLevel;
     }
 }

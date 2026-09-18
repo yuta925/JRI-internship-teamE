@@ -37,7 +37,7 @@ public class LoginDataSource {
                             : csvReader.loginHistoryObjects.get(csvReader.loginHistoryObjects.size() - 1).getLoginDateTime();
 
                     LoggedInUser loggedInUser = new LoggedInUser(
-                            user.getUserId(), user.getDisplayName(), consecutiveDays, lastLoginDateTime);
+                            user.getUserId(), user.getDisplayName(), consecutiveDays, lastLoginDateTime, user.getPermissionLevel());
                     return new Result.Success<>(loggedInUser);
                 }
             }
