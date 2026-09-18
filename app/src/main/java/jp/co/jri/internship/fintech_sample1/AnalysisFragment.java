@@ -125,6 +125,14 @@ public class AnalysisFragment extends Fragment {
         updatePieChart(v);
         setupCombinedChart(v, 6); // 初期は直近6ヶ月
 
+        // カテゴリ別内訳ボタンの設定
+        v.findViewById(R.id.btnCategoryDetail).setOnClickListener(view -> {
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.main2_root, new CategoryDetailFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
+
         // レンジ切り替えボタンの設定
         MaterialButtonToggleGroup toggleRange = v.findViewById(R.id.toggleRange);
         toggleRange.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
@@ -211,9 +219,16 @@ public class AnalysisFragment extends Fragment {
         }
 
         // 円グラフ中央に合計金額を表示
-        pieChart.setCenterText("合計支出\n" + String.format(Locale.JAPAN, "%,d", totalExpense) + "円");
-        pieChart.setCenterTextSize(14f);
-        pieChart.setDrawCenterText(true);
+        // pieChart.setCenterText("合計支出\n" + String.format(Locale.JAPAN, "%,d", totalExpense) + "円");
+        // pieChart.setCenterTextSize(14f);
+        // pieChart.setDrawCenterText(true);
+        pieChart.setDrawCenterText(false);
+
+        // 右上に合計支出を表示
+        TextView tvTotalExpense = v.findViewById(R.id.tvTotalExpense);
+        if (tvTotalExpense != null) {
+            tvTotalExpense.setText(String.format(Locale.JAPAN, "￥%,d", totalExpense));
+        }
 
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColors(colors);
