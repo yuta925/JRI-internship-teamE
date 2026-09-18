@@ -3,8 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="40dp"
-    android:gravity="center_vertical">
+    android:layout_height="wrap_content"
+    android:minHeight="40dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -45,6 +47,36 @@
             android:paddingEnd="10dp"
             android:textSize="13sp"
             android:text="@string/list3"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/transactionMemoContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="0.9" />
+
+        <TextView
+            android:id="@+id/tvTransactionMemo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.4"
+            android:gravity="start"
+            android:textColor="@color/finTextMuted"
+            android:textSize="12sp"
+            tools:text="メモ：次回は解約を検討" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="0.9" />
     </LinearLayout>
 
 </LinearLayout>

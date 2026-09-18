@@ -1,6 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" tools:ignore="Typos">Fintech_sample1</string>
     <string name="smbc_logo_description">SMBCロゴ</string>
+    <string name="back">戻る</string>
     <string name="title_activity_login">ログイン</string>
     <string name="prompt_userId">ユーザーID</string>
     <string name="prompt_password">パスワード</string>
@@ -23,6 +24,9 @@
     <string name="list1" tools:ignore="Typos">"List1"</string>
     <string name="list2">"List2"</string>
     <string name="list3">"List3"</string>
+    <string name="transaction_memo_title">取引メモ</string>
+    <string name="transaction_memo_save">保存</string>
+    <string name="transaction_memo_display">メモ：%1$s</string>
 
     <!-- タブタイトル -->
     <string name="tab_home">"ホーム"</string>
@@ -46,7 +50,7 @@
     <!-- 目標達成率プッシュ通知 -->
     <string name="goal_notification_channel_name">"目標達成率"</string>
     <string name="goal_notification_title">"今月の目標達成率"</string>
-    <string name="goal_notification_text">"目標達成率：%d%%"</string>
+    <string name="goal_notification_text">"目標達成率　支出%1$d%% / 貯金%2$d%%"</string>
 
     <!-- 目標設定（貯金/支出） -->
     <string name="home_target_budget">"今月の最大支出額"</string>
