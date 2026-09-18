@@ -19,14 +19,11 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager2.widget.ViewPager2;
-import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
 
 public class Main2Activity extends AppCompatActivity {
-
-    private static final String[] TAB_TITLES = {"ホーム", "分析", "取引履歴"};
 
     // LoginActivityから連続ログイン日数を受け取るためのIntentキー
     public static final String EXTRA_CONSECUTIVE_LOGIN_DAYS = "extra_consecutive_login_days";
@@ -55,7 +52,7 @@ public class Main2Activity extends AppCompatActivity {
 
         requestNotificationPermissionIfNeeded();
 
-        // 各タブに独自のヘッダーがあるため、共通のActionBarは非表示にする
+        // 共通ヘッダー（ロゴ）とボトムナビゲーションを使うため、共通のActionBarは非表示にする
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
@@ -64,14 +61,31 @@ public class Main2Activity extends AppCompatActivity {
         ViewPager2 pager = findViewById(R.id.pager);
         TapPagerAdapter adapter = new TapPagerAdapter(this);
         pager.setAdapter(adapter);
+        pager.setUserInputEnabled(false); // スワイプではなく下部ナビでのみ切り替える
 
-        // TabLayoutとViewPager2を関連付ける（押下されたタブと内容表示を関連付ける）
-        TabLayout tabs = findViewById(R.id.tab_layout);
-        new TabLayoutMediator(
-                tabs,
-                pager,
-                (tab, position) -> tab.setText(TAB_TITLES[position])
-        ).attach();
+        // ボトムナビゲーションの選択とViewPager2の表示ページを同期する
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
+        bottomNav.setOnItemSelectedListener(item -> {
+            int position;
+            if (item.getItemId() == R.id.nav_home) {
+                position = 0;
+            } else if (item.getItemId() == R.id.nav_analysis) {
+                position = 1;
+            } else {
+                position = 2;
+            }
+            pager.setCurrentItem(position, false);
+            return true;
+        });
+        pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                int itemId = position == 0 ? R.id.nav_home
+                        : position == 1 ? R.id.nav_analysis
+                        : R.id.nav_history;
+                bottomNav.setSelectedItemId(itemId);
+            }
+        });
 
         showLoginStreakPopupIfNeeded();
         notifyGoalProgressOnce();
