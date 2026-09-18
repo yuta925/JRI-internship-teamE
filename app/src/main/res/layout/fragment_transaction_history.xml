@@ -14,23 +14,6 @@
         android:orientation="vertical"
         android:paddingBottom="24dp">
 
-        <!-- ヘッダー -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/finHeader"
-            android:orientation="vertical"
-            android:padding="20dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/tab_history"
-                android:textColor="@color/finHeaderText"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
         <!-- 入出金履歴（直近 / すべて表示） -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
