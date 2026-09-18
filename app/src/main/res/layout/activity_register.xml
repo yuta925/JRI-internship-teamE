@@ -165,7 +165,7 @@
                         android:id="@+id/rbLevel2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="2: 閲覧のみ (資金移動不可)"
+                        android:text="2: 資金移動のみ不可"
                         android:padding="12dp" />
 
                     <View
@@ -177,7 +177,7 @@
                         android:id="@+id/rbLevel3"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="3: 制限付き (残高・グラフのみ)"
+                        android:text="3: 閲覧のみ可能"
                         android:padding="12dp" />
                 </RadioGroup>
             </com.google.android.material.card.MaterialCardView>
