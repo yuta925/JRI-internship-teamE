@@ -19,10 +19,10 @@
     <color name="finBonusBackground">#FFF8E1</color>
     <color name="finBonusText">#8A6D00</color>
 
-    <!-- 分析グラフ用（用途分類ごとの色） -->
-    <color name="finCatFood">#2E7D32</color>
-    <color name="finCatHobby">#F9A825</color>
-    <color name="finCatTransport">#1565C0</color>
-    <color name="finCatFashion">#6A1B9A</color>
-    <color name="finCatOther">#78909C</color>
+    <!-- 分析グラフ用（用途分類ごとの色：色覚バリアフリーかつSMBCトーンを意識） -->
+    <color name="finCatFood">#009E73</color>    <!-- Bluish Green (SMBCの緑に近い) -->
+    <color name="finCatHobby">#E69F00</color>   <!-- Orange -->
+    <color name="finCatTransport">#56B4E9</color> <!-- Sky Blue -->
+    <color name="finCatFashion">#CC79A7</color> <!-- Reddish Purple -->
+    <color name="finCatOther">#999999</color>   <!-- Gray -->
 </resources>

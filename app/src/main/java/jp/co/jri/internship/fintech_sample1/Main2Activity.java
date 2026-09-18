@@ -19,14 +19,11 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager2.widget.ViewPager2;
-import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
 
 public class Main2Activity extends AppCompatActivity {
-
-    private static final String[] TAB_TITLES = {"ホーム", "分析", "取引履歴", "設定"};
 
     // LoginActivityから連続ログイン日数を受け取るためのIntentキー
     public static final String EXTRA_CONSECUTIVE_LOGIN_DAYS = "extra_consecutive_login_days";
@@ -35,7 +32,7 @@ public class Main2Activity extends AppCompatActivity {
     // ポップアップを表示する連続ログイン日数の間隔（5日ごと）
     private static final int LOGIN_STREAK_MILESTONE = 5;
 
-    // 貯金目標（現状は固定値。目標設定機能が未実装のため月ごとの目標額として仮置きしている）
+    // 貯金目標
     private static final int SAVINGS_GOAL = 100000;
     private static final String GOAL_CHANNEL_ID = "goal_progress_channel";
     private static final int GOAL_NOTIFICATION_ID = 1001;
@@ -56,37 +53,68 @@ public class Main2Activity extends AppCompatActivity {
 
         requestNotificationPermissionIfNeeded();
 
-        // 各タブに独自のヘッダーがあるため、共通のActionBarは非表示にする
+        // 共通のActionBarは非表示にする
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
 
-        // アダプタ(TapPagerAdapter)を用いてタブ切り替え時のViewPager2の内容表示を制御する
+        // 権限レベルの取得
         int permissionLevel = getIntent().getIntExtra(EXTRA_PERMISSION_LEVEL, 1);
+
+        // アダプタ(TapPagerAdapter)を用いてタブ切り替え時のViewPager2の内容表示を制御する
         ViewPager2 pager = findViewById(R.id.pager);
         TapPagerAdapter adapter = new TapPagerAdapter(this, permissionLevel);
         pager.setAdapter(adapter);
+        pager.setUserInputEnabled(false); // スワイプではなくボトムナビでのみ切り替える
 
-        // TabLayoutとViewPager2を関連付ける（押下されたタブと内容表示を関連付ける）
-        TabLayout tabs = findViewById(R.id.tab_layout);
-        new TabLayoutMediator(
-                tabs,
-                pager,
-                (tab, position) -> {
-                    if (permissionLevel == 3) {
-                        String[] titlesLevel3 = {"ホーム", "分析", "設定"};
-                        tab.setText(titlesLevel3[position]);
-                    } else {
-                        tab.setText(TAB_TITLES[position]);
-                    }
+        // ボトムナビゲーションの設定
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
+
+        // レベル3のユーザーなら「取引履歴」をメニューから隠す
+        if (permissionLevel == 3) {
+            bottomNav.getMenu().findItem(R.id.nav_history).setVisible(false);
+        }
+
+        // ボトムナビゲーションの選択とViewPager2の同期
+        bottomNav.setOnItemSelectedListener(item -> {
+            int position;
+            int itemId = item.getItemId();
+            if (itemId == R.id.nav_home) {
+                position = 0;
+            } else if (itemId == R.id.nav_analysis) {
+                position = 1;
+            } else if (itemId == R.id.nav_history) {
+                position = 2;
+            } else if (itemId == R.id.nav_settings) {
+                position = (permissionLevel == 3) ? 2 : 3;
+            } else {
+                position = 0;
+            }
+            pager.setCurrentItem(position, false);
+            return true;
+        });
+
+        pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                int itemId;
+                if (position == 0) {
+                    itemId = R.id.nav_home;
+                } else if (position == 1) {
+                    itemId = R.id.nav_analysis;
+                } else if (position == 2) {
+                    itemId = (permissionLevel == 3) ? R.id.nav_settings : R.id.nav_history;
+                } else {
+                    itemId = R.id.nav_settings;
                 }
-        ).attach();
+                bottomNav.setSelectedItemId(itemId);
+            }
+        });
 
         showLoginStreakPopupIfNeeded();
         notifyGoalProgressOnce();
     }
 
-    // Android 13以降は通知の表示にランタイム権限が必要なため、未許可なら要求する
     private void requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
                 && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -95,7 +123,6 @@ public class Main2Activity extends AppCompatActivity {
         }
     }
 
-    // 連続ログイン日数が節目に達していたらお祝いポップアップを表示する
     private void showLoginStreakPopupIfNeeded() {
         int consecutiveLoginDays = getIntent().getIntExtra(EXTRA_CONSECUTIVE_LOGIN_DAYS, 0);
         if (consecutiveLoginDays <= 0) {
@@ -103,11 +130,9 @@ public class Main2Activity extends AppCompatActivity {
         }
 
         if (consecutiveLoginDays == LOGIN_STREAK_SPECIAL_365) {
-            // 365日達成：特別な画像でお祝い
             showImagePopup(R.drawable.login_bonus_365days,
                     "365日連続ログイン達成！\nおめでとうございます！");
         } else if (consecutiveLoginDays == LOGIN_STREAK_SPECIAL_100) {
-            // 100日達成：特別な画像でお祝い
             showImagePopup(R.drawable.login_bonus_100days,
                     "100日連続ログイン達成！");
         } else if (consecutiveLoginDays % LOGIN_STREAK_MILESTONE == 0) {
@@ -119,10 +144,9 @@ public class Main2Activity extends AppCompatActivity {
         }
     }
 
-    // ログイン直後（この画面の起動時）に一度だけ、目標に対する現在の達成状況をプッシュ通知する
     private void notifyGoalProgressOnce() {
         CsvReader parser = new CsvReader();
-        String filename = "LocalFintechDateBase.txt";
+        String filename = "LocalFintechDateBase_v4.txt";
         boolean localFileExists = getFileStreamPath(filename).exists();
         parser.readerFintechDataBase(this, localFileExists);
         List<FintechData> allData = parser.fintechObjects;
@@ -145,7 +169,6 @@ public class Main2Activity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
-            // 通知権限が未許可の場合は送信しない
             return;
         }
 
@@ -172,7 +195,6 @@ public class Main2Activity extends AppCompatActivity {
         }
     }
 
-    // 画像とメッセージを表示するお祝いポップアップ
     private void showImagePopup(int drawableRes, String message) {
         int padding = (int) (24 * getResources().getDisplayMetrics().density);
 

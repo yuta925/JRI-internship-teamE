@@ -16,7 +16,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/finHeader"
+            android:background="@color/finBackground"
             android:padding="8dp">
 
             <ImageButton
@@ -29,14 +29,14 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/finHeaderText" />
+                app:tint="@color/finHeader" />
 
             <TextView
                 android:id="@+id/tvHeaderTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="分析（2026/07）"
-                android:textColor="@color/finHeaderText"
+                android:textColor="@color/finTextPrimary"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -54,7 +54,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/finHeaderText" />
+                app:tint="@color/finHeader" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- 今月の支出内訳（円グラフ） -->
@@ -72,15 +72,33 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/tvPieTitle"
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="支出内訳"
-                    android:textColor="@color/finTextPrimary"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp" />
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:id="@+id/tvPieTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="支出内訳"
+                        android:textColor="@color/finTextPrimary"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true" />
+
+                    <TextView
+                        android:id="@+id/tvTotalExpense"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="￥0"
+                        android:textColor="@color/finTextPrimary"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true" />
+                </RelativeLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -102,6 +120,16 @@
                         android:orientation="vertical"
                         android:layout_marginStart="12dp" />
                 </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCategoryDetail"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="カテゴリ別の内訳を見る"
+                    android:textColor="@color/finHeader"
+                    android:textAllCaps="false" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
