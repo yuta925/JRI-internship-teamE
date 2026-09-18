@@ -1,5 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" tools:ignore="Typos">Fintech_sample1</string>
+    <string name="smbc_logo_description">SMBCロゴ</string>
     <string name="title_activity_login">ログイン</string>
     <string name="prompt_userId">ユーザーID</string>
     <string name="prompt_password">パスワード</string>

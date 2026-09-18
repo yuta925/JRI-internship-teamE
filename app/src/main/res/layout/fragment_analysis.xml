@@ -16,7 +16,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/finHeader"
+            android:background="@color/finBackground"
             android:padding="8dp">
 
             <ImageButton
@@ -29,14 +29,14 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/finHeaderText" />
+                app:tint="@color/finHeader" />
 
             <TextView
                 android:id="@+id/tvHeaderTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="分析（2026/07）"
-                android:textColor="@color/finHeaderText"
+                android:textColor="@color/finTextPrimary"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -54,7 +54,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/finHeaderText" />
+                app:tint="@color/finHeader" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- 今月の支出内訳（円グラフ） -->
