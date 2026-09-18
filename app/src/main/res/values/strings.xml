@@ -1,5 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" tools:ignore="Typos">Fintech_sample1</string>
+    <string name="smbc_logo_description">SMBCロゴ</string>
     <string name="title_activity_login">ログイン</string>
     <string name="prompt_userId">ユーザーID</string>
     <string name="prompt_password">パスワード</string>
@@ -31,6 +32,12 @@
     <!-- ホーム画面 -->
     <string name="home_total_assets">"総資産"</string>
     <string name="home_savings">"今月の貯金"</string>
+    <string name="home_card_title">今月のカード利用</string>
+    <string name="home_card_details">詳細を見る</string>
+    <string name="home_card_history_title">カード利用履歴</string>
+    <string name="home_card_month_total">%1$s　合計 ¥%2$,d</string>
+    <string name="home_card_history_row">%1$s日　%2$s　¥%3$,d</string>
+    <string name="home_card_no_usage">カード利用はありません</string>
     <string name="home_month_over_month_prefix">"前月比 "</string>
     <string name="home_login_bonus_title">"ログインボーナス"</string>
     <string name="home_login_bonus_message">"本日のログインで%dptを獲得しました！"</string>

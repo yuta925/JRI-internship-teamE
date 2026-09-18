@@ -2,6 +2,7 @@ package jp.co.jri.internship.fintech_sample1;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
@@ -70,6 +71,10 @@ public class HomeFragment extends Fragment {
         TextView tvIncome = v.findViewById(R.id.tvIncome);
         TextView tvExpense = v.findViewById(R.id.tvExpense);
         TextView tvSavings = v.findViewById(R.id.tvSavings);
+        TextView tvCardTotal = v.findViewById(R.id.tvCardTotal);
+        Button btnCardDetails = v.findViewById(R.id.btnCardDetails);
+        btnCardDetails.setOnClickListener(view -> startActivity(
+                new Intent(requireContext(), CardHistoryActivity.class)));
 
         // 新しく追加したUIコンポーネント
         tvTargetBudget = v.findViewById(R.id.tvTargetBudget);
@@ -90,6 +95,7 @@ public class HomeFragment extends Fragment {
             tvIncome.setText("¥0");
             tvExpense.setText("¥0");
             tvSavings.setText("¥0");
+            tvCardTotal.setText("¥0");
             updateTargetDisplay();
             return v;
         }
@@ -102,6 +108,7 @@ public class HomeFragment extends Fragment {
 
         int sumIncome = 0;
         sumExpense = 0;
+        int cardTotal = 0;
         Integer previousMonthEndBalance = null;
 
         for (FintechData data : allData) {
@@ -111,6 +118,9 @@ public class HomeFragment extends Fragment {
                     sumIncome += data.getAmount();
                 } else {
                     sumExpense += -data.getAmount();
+                }
+                if ("クレジットカード".equals(data.getCategory()) && data.getAmount() < 0) {
+                    cardTotal += -data.getAmount();
                 }
             }
             if (month.equals(previousMonth)) {
@@ -125,6 +135,7 @@ public class HomeFragment extends Fragment {
         tvIncome.setText(String.format("¥%,d", sumIncome));
         tvExpense.setText(String.format("¥%,d", sumExpense));
         tvSavings.setText(String.format("¥%,d", currentSavings));
+        tvCardTotal.setText(String.format("¥%,d", cardTotal));
 
         if (previousMonthEndBalance != null && previousMonthEndBalance != 0) {
             int diff = totalAssets - previousMonthEndBalance;
