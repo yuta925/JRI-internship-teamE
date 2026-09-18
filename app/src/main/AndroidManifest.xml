@@ -12,6 +12,8 @@
         android:theme="@style/AppTheme">
         <activity android:name=".RegisterActivity"
             android:exported="false" />
+        <activity android:name=".UserManageActivity"
+            android:exported="false" />
         <activity android:name=".Main2Activity"
             android:exported="false" />
         <activity android:name=".TransactionHistoryDetailActivity"
