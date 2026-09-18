@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -23,13 +24,25 @@ public class HomeFragment extends Fragment {
     private static final String KEY_TARGET_BUDGET = "target_budget";
     private static final String KEY_TARGET_SAVINGS = "target_savings";
 
+    // 貯金目標達成率に応じたキャラクター切り替えのしきい値
+    private static final int SAVINGS_CHARACTER_RATE_EXCELLENT = 300;
+    private static final int SAVINGS_CHARACTER_RATE_GOOD = 100;
+    private static final int SAVINGS_CHARACTER_RATE_LOW = 50;
+
+    // 支出目標達成率に応じたキャラクター切り替えのしきい値（使いすぎていないほど良いため貯金と逆向き）
+    private static final int BUDGET_CHARACTER_RATE_GOOD = 50;
+    private static final int BUDGET_CHARACTER_RATE_BAD = 100;
+    private static final int BUDGET_CHARACTER_RATE_WORSE = 300;
+
     private TextView tvTargetBudget;
     private TextView tvAchievementRate;
     private ProgressBar pbAchievement;
+    private ImageView ivBudgetCharacter;
 
     private TextView tvTargetSavings;
     private TextView tvSavingsAchievementRate;
     private ProgressBar pbSavingsAchievement;
+    private ImageView ivSavingsCharacter;
 
     private int sumExpense = 0;
     private int currentSavings = 0;
@@ -67,11 +80,13 @@ public class HomeFragment extends Fragment {
         tvTargetBudget = v.findViewById(R.id.tvTargetBudget);
         tvAchievementRate = v.findViewById(R.id.tvAchievementRate);
         pbAchievement = v.findViewById(R.id.pbAchievement);
+        ivBudgetCharacter = v.findViewById(R.id.ivBudgetCharacter);
         Button btnSetTarget = v.findViewById(R.id.btnSetTarget);
 
         tvTargetSavings = v.findViewById(R.id.tvTargetSavings);
         tvSavingsAchievementRate = v.findViewById(R.id.tvSavingsAchievementRate);
         pbSavingsAchievement = v.findViewById(R.id.pbSavingsAchievement);
+        ivSavingsCharacter = v.findViewById(R.id.ivSavingsCharacter);
         Button btnSetTargetSavings = v.findViewById(R.id.btnSetTargetSavings);
 
         if (allData.isEmpty()) {
@@ -188,10 +203,13 @@ public class HomeFragment extends Fragment {
             } else {
                 tvAchievementRate.setTextColor(getResources().getColor(R.color.finTextPrimary));
             }
+
+            updateBudgetCharacter(rate);
         } else {
             pbAchievement.setProgress(0);
             tvAchievementRate.setText("0%");
             tvAchievementRate.setTextColor(getResources().getColor(R.color.finTextPrimary));
+            ivBudgetCharacter.setVisibility(View.GONE);
         }
 
         // 貯金目標の更新
@@ -208,11 +226,46 @@ public class HomeFragment extends Fragment {
             } else {
                 tvSavingsAchievementRate.setTextColor(getResources().getColor(R.color.finTextPrimary));
             }
+
+            updateSavingsCharacter(rate);
         } else {
             pbSavingsAchievement.setProgress(0);
             tvSavingsAchievementRate.setText("0%");
             tvSavingsAchievementRate.setTextColor(getResources().getColor(R.color.finTextPrimary));
+            ivSavingsCharacter.setVisibility(View.GONE);
         }
+    }
+
+    // 貯金目標の達成率に応じてキャラクター画像を切り替える
+    private void updateSavingsCharacter(int rate) {
+        int drawableRes;
+        if (rate >= SAVINGS_CHARACTER_RATE_EXCELLENT) {
+            drawableRes = R.drawable.character_savings_excellent;
+        } else if (rate >= SAVINGS_CHARACTER_RATE_GOOD) {
+            drawableRes = R.drawable.character_savings_good;
+        } else if (rate >= SAVINGS_CHARACTER_RATE_LOW) {
+            drawableRes = R.drawable.character_savings_low;
+        } else {
+            drawableRes = R.drawable.character_savings_bad;
+        }
+        ivSavingsCharacter.setImageResource(drawableRes);
+        ivSavingsCharacter.setVisibility(View.VISIBLE);
+    }
+
+    // 支出目標の達成率に応じてキャラクター画像を切り替える（使いすぎていないほど良いキャラになる）
+    private void updateBudgetCharacter(int rate) {
+        int drawableRes;
+        if (rate >= BUDGET_CHARACTER_RATE_WORSE) {
+            drawableRes = R.drawable.character_budget_worse;
+        } else if (rate >= BUDGET_CHARACTER_RATE_BAD) {
+            drawableRes = R.drawable.character_budget_bad;
+        } else if (rate >= BUDGET_CHARACTER_RATE_GOOD) {
+            drawableRes = R.drawable.character_budget_good;
+        } else {
+            drawableRes = R.drawable.character_budget_excellent;
+        }
+        ivBudgetCharacter.setImageResource(drawableRes);
+        ivBudgetCharacter.setVisibility(View.VISIBLE);
     }
 
     // 目標金額入力ダイアログの表示（出費）
