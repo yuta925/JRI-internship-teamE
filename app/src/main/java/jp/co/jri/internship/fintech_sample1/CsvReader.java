@@ -40,7 +40,7 @@ public class CsvReader {
         AssetManager assetManager = context.getResources().getAssets();
 
         // ローカルファイルのファイル名を定義
-        String filename = "LocalFintechDateBase_v3.txt";
+        String filename = "LocalFintechDateBase_v4.txt";
 
         try {
             InputStreamReader inputStreamReader;

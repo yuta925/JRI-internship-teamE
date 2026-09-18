@@ -13,12 +13,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.CombinedData;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
@@ -55,7 +60,7 @@ public class AnalysisFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_analysis, container, false);
 
         CsvReader parser = new CsvReader();
-        String filename = "LocalFintechDateBase_v3.txt";
+        String filename = "LocalFintechDateBase_v4.txt";
         boolean localFileExists = requireContext().getFileStreamPath(filename).exists();
         parser.readerFintechDataBase(requireContext(), localFileExists);
         allData = parser.fintechObjects;
@@ -118,16 +123,16 @@ public class AnalysisFragment extends Fragment {
         });
 
         updatePieChart(v);
-        setupBarChart(v, 6); // 初期は直近6ヶ月
+        setupCombinedChart(v, 6); // 初期は直近6ヶ月
 
         // レンジ切り替えボタンの設定
         MaterialButtonToggleGroup toggleRange = v.findViewById(R.id.toggleRange);
         toggleRange.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 if (checkedId == R.id.btn6Months) {
-                    setupBarChart(v, 6);
+                    setupCombinedChart(v, 6);
                 } else if (checkedId == R.id.btn1Year) {
-                    setupBarChart(v, 12);
+                    setupCombinedChart(v, 12);
                 }
             }
         });
@@ -227,8 +232,8 @@ public class AnalysisFragment extends Fragment {
         pieChart.invalidate();
     }
 
-    // 月ごとの収入・支出を棒グラフで表示する
-    private void setupBarChart(View v, int monthRange) {
+    // 月ごとの収入・支出・貯蓄をグラフで表示する
+    private void setupCombinedChart(View v, int monthRange) {
         // 月ごとに収入・支出を集計（月順にソート）
         Map<String, int[]> monthly = new TreeMap<>(); // {月: [収入, 支出]}
         for (FintechData data : allData) {
@@ -248,76 +253,109 @@ public class AnalysisFragment extends Fragment {
 
         List<BarEntry> incomeEntries = new ArrayList<>();
         List<BarEntry> expenseEntries = new ArrayList<>();
+        List<Entry> savingsEntries = new ArrayList<>();
+
+        int cumulativeSavings = 0; // 累計貯金額
         for (int i = 0; i < displayMonths.size(); i++) {
             String month = displayMonths.get(i);
             int[] sums = monthly.get(month);
             incomeEntries.add(new BarEntry(i, (float) sums[0] / 10000));
             expenseEntries.add(new BarEntry(i, (float) sums[1] / 10000));
+            
+            // 累計貯金額を計算 (収入 - 支出)
+            cumulativeSavings += (sums[0] - sums[1]);
+            savingsEntries.add(new Entry(i + 0.5f, (float) cumulativeSavings / 10000));
         }
 
+        // 棒グラフ（収入・支出）
         BarDataSet incomeSet = new BarDataSet(incomeEntries, "収入");
         incomeSet.setColor(ContextCompat.getColor(requireContext(), R.color.finIncome));
-        incomeSet.setDrawValues(false); // 棒の上の数値を非表示
+        incomeSet.setDrawValues(false);
 
         BarDataSet expenseSet = new BarDataSet(expenseEntries, "支出");
         expenseSet.setColor(ContextCompat.getColor(requireContext(), R.color.finExpense));
-        expenseSet.setDrawValues(false); // 棒の上の数値を非表示
+        expenseSet.setDrawValues(false);
 
-        float groupSpace = 0.3f;
-        float barSpace = 0.05f;
         float barWidth = 0.3f;
-
         BarData barData = new BarData(incomeSet, expenseSet);
         barData.setBarWidth(barWidth);
 
-        BarChart barChart = v.findViewById(R.id.barChart);
-        barChart.setData(barData);
-        barChart.getDescription().setEnabled(false);
-        barChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
-        barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(displayMonths));
-        barChart.getXAxis().setGranularity(1f);
-        barChart.getXAxis().setCenterAxisLabels(true);
-        barChart.getAxisRight().setEnabled(false);
-        barChart.getAxisLeft().setAxisMinimum(0f);
+        // 折れ線グラフ（累計貯蓄額）
+        LineDataSet savingsSet = new LineDataSet(savingsEntries, "累計貯蓄");
+        savingsSet.setColor(ContextCompat.getColor(requireContext(), R.color.finSavings));
+        savingsSet.setLineWidth(3f);
+        savingsSet.setCircleColor(ContextCompat.getColor(requireContext(), R.color.finSavings));
+        savingsSet.setCircleRadius(5f);
+        savingsSet.setDrawValues(false);
+        savingsSet.setDrawFilled(true); // 塗りつぶし有効
+        savingsSet.setFillColor(ContextCompat.getColor(requireContext(), R.color.finSavings));
+        savingsSet.setFillAlpha(30);
+        savingsSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        LineData lineData = new LineData(savingsSet);
 
-        // Y軸のフォーマッタ（万単位）
-        barChart.getAxisLeft().setValueFormatter(new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                return String.format(Locale.JAPAN, "%.0f", value);
-            }
-        });
+        barData.groupBars(0, 0.3f, 0.05f); // groupSpace, barSpace
+        CombinedData combinedData = new CombinedData();
+        combinedData.setData(barData);
+        combinedData.setData(lineData);
 
-        barChart.getXAxis().setAxisMinimum(0);
-        barChart.getXAxis().setAxisMaximum(displayMonths.size());
-        barChart.groupBars(0, groupSpace, barSpace);
+        // X軸のラベルを "M月" 形式に変換し、年度の範囲を特定
+        List<String> xLabels = new ArrayList<>();
+        int minYear = 9999;
+        int maxYear = 0;
+        for (String monthStr : displayMonths) {
+            String[] parts = monthStr.split("/");
+            int year = Integer.parseInt(parts[0]);
+            int month = Integer.parseInt(parts[1]);
+            xLabels.add(month + "月");
+            
+            if (year < minYear) minYear = year;
+            if (year > maxYear) maxYear = year;
+        }
 
-        // 凡例の設定（上部中央）
-        Legend legend = barChart.getLegend();
+        // 年度範囲の表示を更新
+        TextView tvBarYearRange = v.findViewById(R.id.tvBarYearRange);
+        if (minYear == maxYear) {
+            tvBarYearRange.setText(minYear + "年");
+        } else {
+            tvBarYearRange.setText(minYear + "年 - " + maxYear + "年");
+        }
+
+        CombinedChart combinedChart = v.findViewById(R.id.combinedChart);
+        combinedChart.setData(combinedData);
+        combinedChart.getDescription().setEnabled(false);
+        combinedChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        combinedChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(xLabels));
+        combinedChart.getXAxis().setGranularity(1f);
+        combinedChart.getXAxis().setCenterAxisLabels(true);
+        combinedChart.getAxisRight().setEnabled(false);
+        combinedChart.getAxisLeft().setAxisMinimum(0f); // 0以上に固定
+
+        combinedChart.getXAxis().setAxisMinimum(-0.5f);
+        combinedChart.getXAxis().setAxisMaximum(displayMonths.size() - 0.5f);
+
+        Legend legend = combinedChart.getLegend();
         legend.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
         legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
-        legend.setDrawInside(false);
         legend.setYOffset(10f);
 
-        barChart.animateY(600);
-        barChart.invalidate();
+        combinedChart.animateY(600);
+        combinedChart.invalidate();
     }
 
     private int colorForCategory(String use) {
         int colorRes;
         switch (use) {
-            case "生活費":
-                colorRes = R.color.finCatLiving;
+            case "食費":
+                colorRes = R.color.finCatFood;
                 break;
-            case "遊興費":
-                colorRes = R.color.finCatFun;
+            case "趣味":
+                colorRes = R.color.finCatHobby;
                 break;
-            case "投資":
-                colorRes = R.color.finCatInvest;
+            case "交通費":
+                colorRes = R.color.finCatTransport;
                 break;
-            case "貯蓄":
-                colorRes = R.color.finCatSavings;
+            case "衣服・美容":
+                colorRes = R.color.finCatFashion;
                 break;
             default:
                 colorRes = R.color.finCatOther;

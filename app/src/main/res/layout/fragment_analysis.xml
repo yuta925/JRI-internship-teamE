@@ -163,19 +163,37 @@
                     </com.google.android.material.button.MaterialButtonToggleGroup>
                 </RelativeLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="(万)"
-                    android:textColor="@color/finTextMuted"
-                    android:textSize="10sp"
-                    android:layout_marginTop="4dp" />
+                    android:layout_marginTop="8dp">
 
-                <com.github.mikephil.charting.charts.BarChart
-                    android:id="@+id/barChart"
+                    <TextView
+                        android:id="@+id/tvBarUnit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="(万)"
+                        android:textColor="@color/finTextMuted"
+                        android:textSize="10sp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true" />
+
+                    <TextView
+                        android:id="@+id/tvBarYearRange"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="2025年 - 2026年"
+                        android:textColor="@color/finTextMuted"
+                        android:textSize="11sp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true" />
+                </RelativeLayout>
+
+                <com.github.mikephil.charting.charts.CombinedChart
+                    android:id="@+id/combinedChart"
                     android:layout_width="match_parent"
                     android:layout_height="260dp"
-                    android:layout_marginTop="4dp" />
+                    android:layout_marginTop="0dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
