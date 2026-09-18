@@ -135,6 +135,8 @@ public class LoginActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, Main2Activity.class);  // インテントの作成
         intent.putExtra(Main2Activity.EXTRA_CONSECUTIVE_LOGIN_DAYS, consecutiveLoginDays);
+        intent.putExtra(Main2Activity.EXTRA_PERMISSION_LEVEL, model.getPermissionLevel());
+        intent.putExtra(Main2Activity.EXTRA_USER_ID, model.getUserId());
         startActivity(intent);                                 // 画面遷移
     }
 

@@ -156,6 +156,25 @@ public class HomeFragment extends Fragment {
         btnSetTarget.setOnClickListener(view -> showTargetInputDialog());
         btnSetTargetSavings.setOnClickListener(view -> showTargetSavingsInputDialog());
 
+        // 送金ボタンの権限制御
+        Button btnTransfer = v.findViewById(R.id.btnTransfer);
+        int permissionLevel = requireActivity().getIntent().getIntExtra(Main2Activity.EXTRA_PERMISSION_LEVEL, 1);
+        
+        if (permissionLevel >= 2) {
+            // レベル2と3は送金不可（無効化）
+            btnTransfer.setEnabled(false);
+            btnTransfer.setText("送金する（権限により制限中）");
+            btnTransfer.setAlpha(0.5f); // 半透明にして「押せない感」を出す
+        } else {
+            btnTransfer.setOnClickListener(view -> {
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("送金")
+                        .setMessage("送金画面へ遷移します（機能未実装）")
+                        .setPositiveButton("OK", null)
+                        .show();
+            });
+        }
+
         return v;
     }
 

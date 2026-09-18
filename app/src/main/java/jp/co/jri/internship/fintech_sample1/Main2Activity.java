@@ -29,6 +29,8 @@ public class Main2Activity extends AppCompatActivity {
 
     // LoginActivityから連続ログイン日数を受け取るためのIntentキー
     public static final String EXTRA_CONSECUTIVE_LOGIN_DAYS = "extra_consecutive_login_days";
+    public static final String EXTRA_PERMISSION_LEVEL = "extra_permission_level";
+    public static final String EXTRA_USER_ID = "extra_user_id";
 
     // ポップアップを表示する連続ログイン日数の間隔（5日ごと）
     private static final int LOGIN_STREAK_MILESTONE = 5;
@@ -37,6 +39,7 @@ public class Main2Activity extends AppCompatActivity {
     private static final String PREFS_NAME = "FintechPrefs";
     private static final String KEY_TARGET_BUDGET = "target_budget";
     private static final String KEY_TARGET_SAVINGS = "target_savings";
+
     private static final String GOAL_CHANNEL_ID = "goal_progress_channel";
     private static final int GOAL_NOTIFICATION_ID = 1001;
 
@@ -56,19 +59,29 @@ public class Main2Activity extends AppCompatActivity {
 
         requestNotificationPermissionIfNeeded();
 
-        // 共通ヘッダー（ロゴ）とボトムナビゲーションを使うため、共通のActionBarは非表示にする
+        // 共通のActionBarは非表示にする
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
 
+        // 権限レベルの取得
+        int permissionLevel = getIntent().getIntExtra(EXTRA_PERMISSION_LEVEL, 1);
+
         // アダプタ(TapPagerAdapter)を用いてタブ切り替え時のViewPager2の内容表示を制御する
         ViewPager2 pager = findViewById(R.id.pager);
-        TapPagerAdapter adapter = new TapPagerAdapter(this);
+        TapPagerAdapter adapter = new TapPagerAdapter(this, permissionLevel);
         pager.setAdapter(adapter);
-        pager.setUserInputEnabled(false); // スワイプではなく下部ナビでのみ切り替える
+        pager.setUserInputEnabled(false); // スワイプではなくボトムナビでのみ切り替える
 
-        // ボトムナビゲーションの選択とViewPager2の表示ページを同期する
+        // ボトムナビゲーションの設定
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
+
+        // レベル3のユーザーなら「取引履歴」をメニューから隠す
+        if (permissionLevel == 3) {
+            bottomNav.getMenu().findItem(R.id.nav_history).setVisible(false);
+        }
+
+        // ボトムナビゲーションの選択とViewPager2の同期
         bottomNav.setOnItemSelectedListener(item -> {
             // カテゴリ詳細などのサブ画面が表示されている場合は、それらを閉じてタブを切り替える
             while (getSupportFragmentManager().getBackStackEntryCount() > 0) {
@@ -76,22 +89,35 @@ public class Main2Activity extends AppCompatActivity {
             }
 
             int position;
-            if (item.getItemId() == R.id.nav_home) {
+            int itemId = item.getItemId();
+            if (itemId == R.id.nav_home) {
                 position = 0;
-            } else if (item.getItemId() == R.id.nav_analysis) {
+            } else if (itemId == R.id.nav_analysis) {
                 position = 1;
-            } else {
+            } else if (itemId == R.id.nav_history) {
                 position = 2;
+            } else if (itemId == R.id.nav_settings) {
+                position = (permissionLevel == 3) ? 2 : 3;
+            } else {
+                position = 0;
             }
             pager.setCurrentItem(position, false);
             return true;
         });
+
         pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
-                int itemId = position == 0 ? R.id.nav_home
-                        : position == 1 ? R.id.nav_analysis
-                        : R.id.nav_history;
+                int itemId;
+                if (position == 0) {
+                    itemId = R.id.nav_home;
+                } else if (position == 1) {
+                    itemId = R.id.nav_analysis;
+                } else if (position == 2) {
+                    itemId = (permissionLevel == 3) ? R.id.nav_settings : R.id.nav_history;
+                } else {
+                    itemId = R.id.nav_settings;
+                }
                 bottomNav.setSelectedItemId(itemId);
             }
         });
@@ -100,7 +126,6 @@ public class Main2Activity extends AppCompatActivity {
         notifyGoalProgressOnce();
     }
 
-    // Android 13以降は通知の表示にランタイム権限が必要なため、未許可なら要求する
     private void requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
                 && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -109,7 +134,6 @@ public class Main2Activity extends AppCompatActivity {
         }
     }
 
-    // 連続ログイン日数が節目に達していたらお祝いポップアップを表示する
     private void showLoginStreakPopupIfNeeded() {
         int consecutiveLoginDays = getIntent().getIntExtra(EXTRA_CONSECUTIVE_LOGIN_DAYS, 0);
         if (consecutiveLoginDays <= 0) {
@@ -117,11 +141,9 @@ public class Main2Activity extends AppCompatActivity {
         }
 
         if (consecutiveLoginDays == LOGIN_STREAK_SPECIAL_365) {
-            // 365日達成：特別な画像でお祝い
             showImagePopup(R.drawable.login_bonus_365days,
                     "365日連続ログイン達成！\nおめでとうございます！");
         } else if (consecutiveLoginDays == LOGIN_STREAK_SPECIAL_100) {
-            // 100日達成：特別な画像でお祝い
             showImagePopup(R.drawable.login_bonus_100days,
                     "100日連続ログイン達成！");
         } else if (consecutiveLoginDays % LOGIN_STREAK_MILESTONE == 0) {
@@ -133,7 +155,6 @@ public class Main2Activity extends AppCompatActivity {
         }
     }
 
-    // ログイン直後（この画面の起動時）に一度だけ、目標に対する現在の達成状況をプッシュ通知する
     private void notifyGoalProgressOnce() {
         CsvReader parser = new CsvReader();
         String filename = "LocalFintechDateBase_v4.txt";
@@ -168,7 +189,6 @@ public class Main2Activity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
-            // 通知権限が未許可の場合は送信しない
             return;
         }
 
@@ -202,7 +222,6 @@ public class Main2Activity extends AppCompatActivity {
         }
     }
 
-    // 画像とメッセージを表示するお祝いポップアップ
     private void showImagePopup(int drawableRes, String message) {
         int padding = (int) (24 * getResources().getDisplayMetrics().density);
 

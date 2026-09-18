@@ -94,26 +94,65 @@ public class CsvReader {
 
     // UserDataを読み込む処理（userObjectsに格納される）
     public void readerUserDataBase(Context context) {
-        AssetManager assetManager = context.getResources().getAssets();
+        String filename = "LocalUserDataBase.txt";
+        boolean localExists = context.getFileStreamPath(filename).exists();
+
         try {
-            // CSVファイルの読み込み
-            InputStream inputStream = assetManager.open("UserDataBase.csv");
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferReader = new BufferedReader(inputStreamReader);
+            InputStreamReader isr;
+            if (localExists) {
+                // ローカルファイルから読み込む
+                isr = new InputStreamReader(context.openFileInput(filename), StandardCharsets.UTF_8);
+            } else {
+                // 初回：Assetから読み込み、ローカルに書き出す
+                AssetManager assetManager = context.getResources().getAssets();
+                InputStream is = assetManager.open("UserDataBase.csv");
+                isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+                BufferedReader br = new BufferedReader(isr);
+                String line;
+                try (FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE)) {
+                    while ((line = br.readLine()) != null) {
+                        // 既存のCSVに権限(1)と親ID(none)を補完して保存
+                        String outLine = line.endsWith(",") ? line + "1,none\n" : line + ",1,none\n";
+                        fos.write(outLine.getBytes(StandardCharsets.UTF_8));
+                    }
+                }
+                br.close();
+                // 書き出したファイルを再度開く
+                isr = new InputStreamReader(context.openFileInput(filename), StandardCharsets.UTF_8);
+            }
+
+            BufferedReader bufferReader = new BufferedReader(isr);
             String line;
+            userObjects.clear();
             while ((line = bufferReader.readLine()) != null) {
-                // カンマ区切りで１つづつ配列に入れる
                 String[] RowData = line.split(",");
-                UserData userData = new UserData(
-                        RowData[0],
-                        RowData[1],
-                        RowData[2]
-                );
-                userObjects.add(userData);
+                if (RowData.length >= 3) {
+                    int permission = (RowData.length >= 4) ? Integer.parseInt(RowData[3]) : 1;
+                    String parentId = (RowData.length >= 5) ? RowData[4] : "none";
+                    UserData userData = new UserData(
+                            RowData[0],
+                            RowData[1],
+                            RowData[2],
+                            permission,
+                            parentId
+                    );
+                    userObjects.add(userData);
+                }
             }
             bufferReader.close();
         } catch (IOException e) {
-            Log.e(TAG, "CSV読み込みエラー", e);
+            Log.e(TAG, "ユーザーデータ読み込みエラー", e);
+        }
+    }
+
+    // 新しいユーザーをローカルファイルに追記する
+    public void appendUser(Context context, UserData user) {
+        String filename = "LocalUserDataBase.txt";
+        String line = user.getUserId() + "," + user.getPassword() + "," + user.getDisplayName() + "," + user.getPermissionLevel() + "," + user.getParentUserId() + "\n";
+        try (FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE | Context.MODE_APPEND)) {
+            fos.write(line.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            Log.e(TAG, "ユーザー追加エラー", e);
         }
     }
 
